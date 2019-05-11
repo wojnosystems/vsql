@@ -10,10 +10,10 @@ package vstmt
 
 import (
 	"context"
+	"github.com/wojnosystems/vsql/param"
+	"github.com/wojnosystems/vsql/vresult"
+	"github.com/wojnosystems/vsql/vrows"
 	"io"
-	"vsql/param"
-	"vsql/vresult"
-	"vsql/vrows"
 )
 
 // Statements are inherently database-specific. Implementations are located with the driver

@@ -13,9 +13,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/stretchr/testify/mock"
+	"github.com/wojnosystems/vsql/vquery"
+	"github.com/wojnosystems/vsql/vrows"
 	"testing"
-	"vsql/vquery"
-	"vsql/vrows"
 )
 
 func TestEachRow_ErrorEachRow(t *testing.T) {

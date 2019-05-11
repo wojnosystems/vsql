@@ -6,22 +6,11 @@
 //
 //THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package param
+package vsql
 
-import "github.com/stretchr/testify/mock"
+import "fmt"
 
-type QueryerMock struct {
-	mock.Mock
-}
-
-func (q *QueryerMock) Interpolate(strategy InterpolateStrategy) (query string, params []interface{}, err error) {
-	a := q.Called(strategy)
-	query = a.Get(0).(string)
-	params = a.Get(1).([]interface{})
-	err = a.Error(2)
-	return
-}
-func (q *QueryerMock) SQLQuery(strategy InterpolateStrategy) string {
-	a := q.Called(strategy)
-	return a.Get(0).(string)
+// BT wraps the value in backticks. No escaping is performed. This is assumed this is for table names
+func BT(s string) string {
+	return fmt.Sprintf("`%s`", s)
 }

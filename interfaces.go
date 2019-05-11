@@ -9,9 +9,9 @@
 package vsql
 
 import (
-	"vsql/pinger"
-	"vsql/vquery"
-	"vsql/vstmt"
+	"github.com/wojnosystems/vsql/pinger"
+	"github.com/wojnosystems/vsql/vquery"
+	"github.com/wojnosystems/vsql/vstmt"
 )
 
 type QueryExecer interface {

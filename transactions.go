@@ -10,7 +10,7 @@ package vsql
 
 import (
 	"context"
-	"vsql/vtxn"
+	"github.com/wojnosystems/vsql/vtxn"
 )
 
 type TransactionStarter interface {

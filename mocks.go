@@ -11,11 +11,11 @@ package vsql
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
-	"vsql/param"
-	"vsql/vresult"
-	"vsql/vrows"
-	"vsql/vstmt"
-	"vsql/vtxn"
+	"github.com/wojnosystems/vsql/param"
+	"github.com/wojnosystems/vsql/vresult"
+	"github.com/wojnosystems/vsql/vrows"
+	"github.com/wojnosystems/vsql/vstmt"
+	"github.com/wojnosystems/vsql/vtxn"
 )
 
 type PingerMock struct {

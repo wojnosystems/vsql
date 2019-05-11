@@ -1,4 +1,4 @@
-module vsql
+module github.com/wojnosystems/vsql
 
 go 1.12
 

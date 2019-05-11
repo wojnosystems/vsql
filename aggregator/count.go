@@ -11,11 +11,11 @@ package aggregator
 import (
 	"context"
 	"database/sql"
-	"vsql/param"
-	"vsql/ulong"
-	"vsql/vquery"
-	"vsql/vrow"
-	"vsql/vrows"
+	"github.com/wojnosystems/vsql/param"
+	"github.com/wojnosystems/vsql/ulong"
+	"github.com/wojnosystems/vsql/vquery"
+	"github.com/wojnosystems/vsql/vrow"
+	"github.com/wojnosystems/vsql/vrows"
 )
 
 // Count is a convenience method to count the number of results from a vquery

@@ -11,9 +11,9 @@ package vrow
 import (
 	"context"
 	"database/sql"
-	"vsql/param"
-	"vsql/vquery"
-	"vsql/vrows"
+	"github.com/wojnosystems/vsql/param"
+	"github.com/wojnosystems/vsql/vquery"
+	"github.com/wojnosystems/vsql/vrows"
 )
 
 // Each is a convenience method to help take are of converting multiple vrows of similar types into your custom types.

@@ -11,9 +11,9 @@ package vquery
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
-	"vsql/param"
-	"vsql/vresult"
-	"vsql/vrows"
+	"github.com/wojnosystems/vsql/param"
+	"github.com/wojnosystems/vsql/vresult"
+	"github.com/wojnosystems/vsql/vrows"
 )
 
 type QueryerMock struct {

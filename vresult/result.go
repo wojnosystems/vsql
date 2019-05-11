@@ -10,7 +10,7 @@ package vresult
 
 import (
 	"database/sql"
-	"vsql/ulong"
+	"github.com/wojnosystems/vsql/ulong"
 )
 
 type Resulter interface {
