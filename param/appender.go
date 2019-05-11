@@ -15,24 +15,24 @@ type appender struct {
 }
 
 // NewAppend creates a new appending Parameterer in which you can repeatedly append values to the parameter list as desired
-func NewAppend( query string ) Appender {
+func NewAppend(query string) Appender {
 	return &appender{
-		query: query,
+		query:      query,
 		parameters: make([]interface{}, 0, 1),
 	}
 }
 
 // NewAppendWithData creates a new appending Parameterer in which you can repeatedly append values to the parameter list as desired
-// this version allows you to optionally set a variadic amount of data to append. This makes one-line query-building easier
-func NewAppendWithData( query string, data ...interface{}) Appender {
+// this version allows you to optionally set a variadic amount of data to append. This makes one-line vquery-building easier
+func NewAppendWithData(query string, data ...interface{}) Appender {
 	return &appender{
-		query: query,
+		query:      query,
 		parameters: data,
 	}
 }
 
 // Append adds a value to the end of the parameterized values list
-// Values are injected into the query in the order you call Append
+// Values are injected into the vquery in the order you call Append
 func (p *appender) Append(value interface{}) {
 	p.parameters = append(p.parameters, value)
 }

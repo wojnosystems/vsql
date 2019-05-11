@@ -12,20 +12,20 @@ import (
 	"context"
 	"database/sql"
 	"vsql/param"
-	"vsql/query"
-	"vsql/row"
-	"vsql/rows"
 	"vsql/ulong"
+	"vsql/vquery"
+	"vsql/vrow"
+	"vsql/vrows"
 )
 
-// Count is a convenience method to count the number of results from a query
+// Count is a convenience method to count the number of results from a vquery
 // @param ctx Context to constrain the run-time of this call
-// @param query the SQL query and parameters to use in the call
+// @param vquery the SQL vquery and parameters to use in the call
 // @return number how many things are counted
 // @return err errors encountered while making the database call. Database-specific errors are likely
-func Count(ctx context.Context, queryer query.Queryer, q param.Queryer) (number ulong.ULong, err error) {
+func Count(ctx context.Context, queryer vquery.Queryer, q param.Queryer) (number ulong.ULong, err error) {
 	var ok bool
-	ok, err = row.QueryOne(queryer, ctx, q, func(ro rows.Rower) (err error) {
+	ok, err = vrow.QueryOne(queryer, ctx, q, func(ro vrows.Rower) (err error) {
 		return ro.Scan(&number)
 	})
 	if !ok {
@@ -33,4 +33,3 @@ func Count(ctx context.Context, queryer query.Queryer, q param.Queryer) (number 
 	}
 	return
 }
-

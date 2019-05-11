@@ -6,38 +6,38 @@
 //
 //THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package query
+package vquery
 
 import (
 	"context"
 	"vsql/param"
-	"vsql/result"
-	"vsql/rows"
+	"vsql/vresult"
+	"vsql/vrows"
 )
 
 type Queryer interface {
 	// Query the database for read-only results. If you need to insert or update/edit, use Inserter or Execer, respectively
 	// @param ctx Context to constrain the run-time of this call
-	// @param query the SQL query and parameters to use in the call
-	// @return rows the results
+	// @param vquery the SQL vquery and parameters to use in the call
+	// @return vrows the results
 	// @return err errors encountered while making the database call. Database-specific errors are likely
-	Query(ctx context.Context, query param.Queryer) (rows rows.Rowser, err error)
+	Query(ctx context.Context, query param.Queryer) (rows vrows.Rowser, err error)
 }
 
 type Inserter interface {
-	// Insert a row into the database
+	// Insert a vrow into the database
 	// @param ctx Context to constrain the run-time of this call
-	// @param query the SQL query and parameters to use in the call
-	// @return result the outcome of the insert
+	// @param vquery the SQL vquery and parameters to use in the call
+	// @return vresult the outcome of the insert
 	// @return err errors encountered while making the database call. Database-specific errors are likely
-	Insert(ctx context.Context, query param.Queryer) (result result.InsertResulter, err error)
+	Insert(ctx context.Context, query param.Queryer) (result vresult.InsertResulter, err error)
 }
 
 type Execer interface {
 	// Exec the database for update/edit requests
 	// @param ctx Context to constrain the run-time of this call
-	// @param query the SQL query and parameters to use in the call
-	// @return rows the results
+	// @param vquery the SQL vquery and parameters to use in the call
+	// @return vrows the results
 	// @return err errors encountered while making the database call. Database-specific errors are likely
-	Exec(ctx context.Context, query param.Queryer) (result result.Resulter, err error)
+	Exec(ctx context.Context, query param.Queryer) (result vresult.Resulter, err error)
 }

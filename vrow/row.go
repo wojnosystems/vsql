@@ -6,22 +6,22 @@
 //
 //THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package row
+package vrow
 
 import (
 	"context"
 	"database/sql"
 	"vsql/param"
-	"vsql/query"
-	"vsql/rows"
+	"vsql/vquery"
+	"vsql/vrows"
 )
 
-// Each is a convenience method to help take are of converting multiple rows of similar types into your custom types.
+// Each is a convenience method to help take are of converting multiple vrows of similar types into your custom types.
 //
 // Each will also handle cleaning up the Rowser record when it returns, preventing memory leaks
 //
 // @param r comes from Query() calls
-// @param eachRow is a predicate to call for each row encountered. Return false, nil to keep going. Return true, nil to stop the loop and clean up the row. If you return an error, that error will be passed to the caller of Each and iteration will stop as well.
+// @param eachRow is a predicate to call for each vrow encountered. Return false, nil to keep going. Return true, nil to stop the loop and clean up the vrow. If you return an error, that error will be passed to the caller of Each and iteration will stop as well.
 // @return err the database error encountered or that was returned from eachRow
 //
 // this will not return that annoying sql.ErrNoRows error. Usually, you're building an array with this and NoRows is not an error, but a valid state.
@@ -30,17 +30,17 @@ import (
 //   users := make([]User,0,10)
 //   q, err := db.Query(queryParam)
 //   if err != nil { return err }
-//   err := sqlface.Each( q, func(row Rower)(stop bool, err error) {
+//   err := sqlface.Each( q, func(vrow Rower)(stop bool, err error) {
 //     u := User
-//     err = row.Scan(&u.name, &u.age)
+//     err = vrow.Scan(&u.name, &u.age)
 //     if err == nil {
 //       users = append(users, user)
 //     }
 //     return true, err
 //   } )
-func Each( r rows.Rowser, eachRow func(ro rows.Rower)(stop bool, err error) ) (err error) {
+func Each(r vrows.Rowser, eachRow func(ro vrows.Rower) (stop bool, err error)) (err error) {
 	defer func() { _ = r.Close() }()
-	var ro rows.Rower
+	var ro vrows.Rower
 	for {
 		ro = r.Next()
 		if ro == nil {
@@ -57,8 +57,8 @@ func Each( r rows.Rowser, eachRow func(ro rows.Rower)(stop bool, err error) ) (e
 	return
 }
 
-func QueryEach( queryer query.Queryer, ctx context.Context, q param.Queryer, eachRow func(ro rows.Rower)(cont bool, err error) ) (err error) {
-	var qr rows.Rowser
+func QueryEach(queryer vquery.Queryer, ctx context.Context, q param.Queryer, eachRow func(ro vrows.Rower) (cont bool, err error)) (err error) {
+	var qr vrows.Rowser
 	qr, err = queryer.Query(ctx, q)
 	if err == sql.ErrNoRows {
 		// hide the noRows error, dumb interface decision to use error for this state... :(
@@ -71,20 +71,20 @@ func QueryEach( queryer query.Queryer, ctx context.Context, q param.Queryer, eac
 		// return the error
 		return
 	}
-	return Each( qr, eachRow )
+	return Each(qr, eachRow)
 }
 
-// One is a convenience method to help take are of converting a single row into a single item
+// One is a convenience method to help take are of converting a single vrow into a single item
 //
 // One will also handle cleaning up the Rowser record when it returns, preventing memory leaks
 //
 // @param r comes from Query() calls
-// @param theRow is a predicate to call for the top row encountered. If you return an error, that error will be passed to the caller of One
-// @return ok true if the database returned at least 1 result, false if nothing was returned
+// @param theRow is a predicate to call for the top vrow encountered. If you return an error, that error will be passed to the caller of One
+// @return ok true if the database returned at least 1 vresult, false if nothing was returned
 // @return err the database error encountered or that was returned from eachRow
 //
 // this will not return that annoying sql.ErrNoRows error. Usually, you're building an array with this and NoRows is not an error, but a valid state.
-func One( r rows.Rowser, theRow func(ro rows.Rower)(err error)) (ok bool, err error) {
+func One(r vrows.Rowser, theRow func(ro vrows.Rower) (err error)) (ok bool, err error) {
 	defer func() { _ = r.Close() }()
 	ro := r.Next()
 	if ro == nil {
@@ -96,8 +96,8 @@ func One( r rows.Rowser, theRow func(ro rows.Rower)(err error)) (ok bool, err er
 	return true, err
 }
 
-func QueryOne( queryer query.Queryer, ctx context.Context, q param.Queryer, theRow func(ro rows.Rower)(err error) ) (ok bool, err error) {
-	var qr rows.Rowser
+func QueryOne(queryer vquery.Queryer, ctx context.Context, q param.Queryer, theRow func(ro vrows.Rower) (err error)) (ok bool, err error) {
+	var qr vrows.Rowser
 	qr, err = queryer.Query(ctx, q)
 	if err == sql.ErrNoRows {
 		// hide the noRows error, dumb interface decision to use error for this state... :(
@@ -110,5 +110,5 @@ func QueryOne( queryer query.Queryer, ctx context.Context, q param.Queryer, theR
 		// return the error
 		return
 	}
-	return One( qr, theRow )
+	return One(qr, theRow)
 }

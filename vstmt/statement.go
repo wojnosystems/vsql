@@ -6,39 +6,36 @@
 //
 //THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package txn
+package vstmt
 
-import "database/sql"
+import (
+	"context"
+	"io"
+	"vsql/param"
+	"vsql/vresult"
+	"vsql/vrows"
+)
 
-type TxOptioner interface {
-	IsolationLevel() sql.IsolationLevel
-	SetIsolationLevel( sql.IsolationLevel )
+// Statements are inherently database-specific. Implementations are located with the driver
+type StatementQueryer interface {
+	Query(ctx context.Context, query param.Parameterer) (rows vrows.Rowser, err error)
+}
 
-	ReadOnly() bool
-	SetReadOnly( bool )
+type StatementInserter interface {
+	Insert(ctx context.Context, query param.Parameterer) (result vresult.InsertResulter, err error)
+}
 
-	ToTxOptions() (o *sql.TxOptions)
+type StatementExecer interface {
+	Exec(ctx context.Context, query param.Parameterer) (result vresult.Resulter, err error)
 }
-type TxOption struct {
-	isolationLevel sql.IsolationLevel
-	readOnly bool
+
+type Statementer interface {
+	io.Closer
+	StatementQueryer
+	StatementInserter
+	StatementExecer
 }
-func (t TxOption)IsolationLevel() sql.IsolationLevel {
-	return t.isolationLevel
-}
-func (t *TxOption)SetIsolationLevel( x sql.IsolationLevel ){
-	t.isolationLevel = x
-}
-func (t TxOption)ReadOnly() bool {
-	return t.readOnly
-}
-func (t *TxOption)SetReadOnly( x bool ){
-	t.readOnly = x
-}
-func (t TxOption)ToTxOptions() *sql.TxOptions {
-	r := &sql.TxOptions{
-		ReadOnly: t.readOnly,
-		Isolation: t.isolationLevel,
-	}
-	return r
+
+type Preparer interface {
+	Prepare(ctx context.Context, query param.Queryer) (stmt Statementer, err error)
 }

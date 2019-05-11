@@ -10,15 +10,15 @@ package vsql
 
 import (
 	"vsql/pinger"
-	"vsql/query"
-	"vsql/stmt"
+	"vsql/vquery"
+	"vsql/vstmt"
 )
 
 type QueryExecer interface {
-	query.Queryer
-	query.Inserter
-	query.Execer
-	stmt.Preparer
+	vquery.Queryer
+	vquery.Inserter
+	vquery.Execer
+	vstmt.Preparer
 }
 
 type SQLer interface {

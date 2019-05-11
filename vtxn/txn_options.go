@@ -6,51 +6,40 @@
 //
 //THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package query
+package vtxn
 
-import (
-	"context"
-	"github.com/stretchr/testify/mock"
-	"vsql/param"
-	"vsql/result"
-	"vsql/rows"
-)
+import "database/sql"
 
-type QueryerMock struct {
-	mock.Mock
+type TxOptioner interface {
+	IsolationLevel() sql.IsolationLevel
+	SetIsolationLevel(sql.IsolationLevel)
+
+	ReadOnly() bool
+	SetReadOnly(bool)
+
+	ToTxOptions() (o *sql.TxOptions)
+}
+type TxOption struct {
+	isolationLevel sql.IsolationLevel
+	readOnly       bool
 }
 
-func (m *QueryerMock) Query(ctx context.Context, q param.Queryer) (rows.Rowser, error) {
-	a := m.Called(ctx, q)
-	r := a.Get(0)
-	if r == nil {
-		return nil, a.Error(1)
+func (t TxOption) IsolationLevel() sql.IsolationLevel {
+	return t.isolationLevel
+}
+func (t *TxOption) SetIsolationLevel(x sql.IsolationLevel) {
+	t.isolationLevel = x
+}
+func (t TxOption) ReadOnly() bool {
+	return t.readOnly
+}
+func (t *TxOption) SetReadOnly(x bool) {
+	t.readOnly = x
+}
+func (t TxOption) ToTxOptions() *sql.TxOptions {
+	r := &sql.TxOptions{
+		ReadOnly:  t.readOnly,
+		Isolation: t.isolationLevel,
 	}
-	return r.(rows.Rowser), a.Error(1)
-}
-
-type InserterMock struct {
-	mock.Mock
-}
-
-func (m *InserterMock) Insert(ctx context.Context, q param.Queryer) (result.InsertResulter, error) {
-	a := m.Called(ctx, q)
-	r := a.Get(0)
-	if r == nil {
-		return nil, a.Error(1)
-	}
-	return r.(result.InsertResulter), a.Error(1)
-}
-
-type ExecerMock struct {
-	mock.Mock
-}
-
-func (m *ExecerMock) Exec(ctx context.Context, q param.Queryer) (result.Resulter, error) {
-	a := m.Called(ctx, q)
-	r := a.Get(0)
-	if r == nil {
-		return nil, a.Error(1)
-	}
-	return r.(result.Resulter), a.Error(1)
+	return r
 }

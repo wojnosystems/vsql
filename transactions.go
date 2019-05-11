@@ -10,11 +10,11 @@ package vsql
 
 import (
 	"context"
-	"vsql/txn"
+	"vsql/vtxn"
 )
 
 type TransactionStarter interface {
-	Begin(context.Context, txn.TxOptioner) (qet QueryExecTransactioner, err error)
+	Begin(context.Context, vtxn.TxOptioner) (qet QueryExecTransactioner, err error)
 }
 
 type Transactioner interface {
@@ -33,5 +33,5 @@ type NestedTransactioner interface {
 }
 
 type NestedTransactionStarter interface {
-	Begin(context.Context, txn.TxOptioner) (nt NestedTransactioner, err error)
+	Begin(context.Context, vtxn.TxOptioner) (nt NestedTransactioner, err error)
 }

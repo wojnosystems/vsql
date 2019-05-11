@@ -6,7 +6,7 @@
 //
 //THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package rows
+package vrows
 
 import (
 	"database/sql"
@@ -14,17 +14,17 @@ import (
 )
 
 type Rowser interface {
-	// Next gets the first/next row.
-	// @return row, the next row, or nil if no more rows are available
+	// Next gets the first/next vrow.
+	// @return vrow, the next vrow, or nil if no more vrows are available
 	Next() (row Rower)
 	io.Closer
 }
 
 type Rower interface {
-	// Columns returns a list of columns available for this row
+	// Columns returns a list of columns available for this vrow
 	Columns() (columnNames []string)
 
-	// Scan reads values from the result and inserts them into the pointers passed in as arguments
+	// Scan reads values from the vresult and inserts them into the pointers passed in as arguments
 	Scan(destination ...interface{}) (err error)
 }
 
@@ -34,28 +34,30 @@ type RowsImpl struct {
 }
 
 // Next calls Next() on the sql.Rows object
-func (m *RowsImpl)Next() Rower {
+func (m *RowsImpl) Next() Rower {
 	if m.SqlRows.Next() {
-		return &rowImpl{SqlRows:m.SqlRows}
+		return &rowImpl{SqlRows: m.SqlRows}
 	}
 	return nil
 }
-// Close cleans up the Rows object, releasing it's object back to the pool. Call this when you're done with your query results
-func (m *RowsImpl)Close() error {
+
+// Close cleans up the Rows object, releasing it's object back to the pool. Call this when you're done with your vquery results
+func (m *RowsImpl) Close() error {
 	return m.SqlRows.Close()
 }
 
 type rowImpl struct {
 	SqlRows *sql.Rows
 }
+
 // Scan calls Scan() on the sql.Rows object and is the primary way to convert values from SQL into Go-native objects
-func (m *rowImpl)Scan( dest ...interface{} ) error {
+func (m *rowImpl) Scan(dest ...interface{}) error {
 	return m.SqlRows.Scan(dest...)
 }
-// Columns returns a list of columns available for this row
-func (m *rowImpl)Columns() (columnNames []string) {
-	// #NOERR: Will never error as this cannot be used while the row is closed
+
+// Columns returns a list of columns available for this vrow
+func (m *rowImpl) Columns() (columnNames []string) {
+	// #NOERR: Will never error as this cannot be used while the vrow is closed
 	columnNames, _ = m.SqlRows.Columns()
 	return
 }
-

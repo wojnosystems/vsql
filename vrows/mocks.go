@@ -1,4 +1,4 @@
-package rows
+package vrows
 
 import "github.com/stretchr/testify/mock"
 

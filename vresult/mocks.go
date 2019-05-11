@@ -1,4 +1,4 @@
-package result
+package vresult
 
 import (
 	"github.com/stretchr/testify/mock"

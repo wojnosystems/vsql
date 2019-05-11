@@ -6,7 +6,7 @@
 //
 //THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package result
+package vresult
 
 import (
 	"database/sql"
@@ -14,11 +14,11 @@ import (
 )
 
 type Resulter interface {
-	RowsAffected() (rowsAffected ulong.ULong,err error)
+	RowsAffected() (rowsAffected ulong.ULong, err error)
 }
 
 type InsertResulter interface {
-	LastInsertId() (id ulong.ULong,err error)
+	LastInsertId() (id ulong.ULong, err error)
 	Resulter
 }
 
@@ -28,7 +28,7 @@ type QueryResult struct {
 	SqlRes sql.Result
 }
 
-// RowsAffected is the number of rows that were altered/created/deleted from the call that produced this Resulter
+// RowsAffected is the number of vrows that were altered/created/deleted from the call that produced this Resulter
 func (r *QueryResult) RowsAffected() (ulong.ULong, error) {
 	v, err := r.SqlRes.RowsAffected()
 	if err != nil {
@@ -37,7 +37,7 @@ func (r *QueryResult) RowsAffected() (ulong.ULong, error) {
 	return ulong.NewInt64(v), err
 }
 
-// RowsAffected is ID of the row that was inserted from the call that produced this Resulter. Not all databases support this
+// RowsAffected is ID of the vrow that was inserted from the call that produced this Resulter. Not all databases support this
 func (r *QueryResult) LastInsertId() (ulong.ULong, error) {
 	v, err := r.SqlRes.LastInsertId()
 	if err != nil {
