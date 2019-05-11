@@ -6,42 +6,8 @@
 //
 //THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package vrows
+package vsql
 
-import "github.com/stretchr/testify/mock"
-
-type RowserMock struct {
-	mock.Mock
-}
-
-func (m *RowserMock) Next() Rower {
-	a := m.Called()
-	r := a.Get(0)
-	if r == nil {
-		return nil
-	}
-	return r.(Rower)
-}
-func (m *RowserMock) Close() error {
-	a := m.Called()
-	return a.Error(0)
-}
-
-type RowerMock struct {
-	mock.Mock
-	// ScanTransform allows you to edit the values of the scan to more adequately mock the request
-	ScanTransform func(values ...interface{})
-}
-
-func (m *RowerMock) Scan(values ...interface{}) error {
-	a := m.Called(values)
-	if m.ScanTransform != nil {
-		m.ScanTransform(values...)
-	}
-	return a.Error(0)
-}
-
-func (m *RowerMock) Columns() (columnNames []string) {
-	a := m.Called()
-	return a.Get(0).([]string)
-}
+// H is a short-cut for making string-keyed, interface-valued hashes. Stolen (with love) from Go-Gin ;)
+// this exists solely for making code easier to read
+type H map[string]interface{}

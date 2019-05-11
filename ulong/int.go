@@ -13,10 +13,14 @@ package ulong
 // keep that in mind, this value is only as good as the database you're running. It may not support 64-bit integers.
 type ULong uint64
 
-func New( v uint64 ) ULong {
+func New(v uint64) ULong {
 	return ULong(v)
 }
 
-func NewInt64( v int64 ) ULong {
+func NewInt64(v int64) ULong {
+	return ULong(v)
+}
+
+func NewInt(v int) ULong {
 	return ULong(v)
 }

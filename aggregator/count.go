@@ -18,7 +18,7 @@ import (
 	"github.com/wojnosystems/vsql/vrows"
 )
 
-// Count is a convenience method to count the number of results from a vquery
+// Count is a convenience method to extract the COUNT from a vquery and assumes that your query looks like: `SELECT COUNT(*) FROM...`
 // @param ctx Context to constrain the run-time of this call
 // @param vquery the SQL vquery and parameters to use in the call
 // @return number how many things are counted
