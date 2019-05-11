@@ -20,6 +20,7 @@ type TxOptioner interface {
 	ToTxOptions() (o *sql.TxOptions)
 }
 type TxOption struct {
+	TxOptioner
 	isolationLevel sql.IsolationLevel
 	readOnly       bool
 }

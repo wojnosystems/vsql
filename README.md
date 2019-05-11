@@ -267,6 +267,39 @@ original := "mytable"
 backTicked := vsql.BT(original) // => "`mytable`"
 ```
 
+## Transaction Wrapping
+
+Transactions require that you commit or roll them back after executing a set of statements. The `vsql.Txn` and `vsql.TxnNested` provides a clean way to perform transactions as a set. If you need to have transactions span to callers, then don't use these. If, however, you are composing downward dependent transactions (as in, you start a transaction and then perform queries/execs on that transaction or child transactions), this this is what you want.
+
+These methods take care of Begin'ing the transaction and cleaning up after them using Commit/Rollback. In the event of a panic, Rollback is called. It can be used like this:
+
+```go
+err := vsql.Txn(c, context.Background(), nil, func(tx vsql.QueryExecer) (rollback bool, err error) {
+    _, err = tx.Insert(context.Background(), param.NewAppendWithData("INSERT INTO `"+tableName+"` (name,age) VALUES (?,?)", "chris", 21))
+    if err != nil {
+        t.Error("Error not expected when inserting data")
+    }
+
+    count, err := aggregator.Count(context.Background(), tx, param.New("SELECT COUNT(*) FROM `"+tableName+"`"))
+    if err != nil {
+        t.Error("Error not expected when counting data")
+    }
+    if 1 != count {
+        t.Errorf(`Expected to insert 1 record, but inserted %d`, count)
+    }
+
+    rollback = true
+    return
+})
+if err != nil {
+    t.Fatal("error starting transaction")
+}
+```
+
+This begins a transaction, inserts the row, counts the row, then rolls the transaction back. This means the insert is undone. The rollback occurs when rollback is set to true. By default, it is false, so if you do nothing and have the transaction return, it will be committed (unless an error occurs).
+
+If you return an error, a rollback will be issued as well, but the error will be propagated up and returned to the caller of vsql.Txn.
+
 # License 
 
 Copyright 2019 Chris Wojno

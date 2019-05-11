@@ -28,8 +28,11 @@ type Rower interface {
 	Scan(destination ...interface{}) (err error)
 }
 
-// rowsImpl is the implementation of the Rowser interface
+// RowsImpl is the implementation of the Rowser interface
+// this is exported and rowImpl is not as this can be used by implementing libraries to avoid having to write their own implementations, if they so desire.
+// Note to people using this module/package, unless you're writing a driver, you probably shouldn't be using this. You should use the Rowser interface instead
 type RowsImpl struct {
+	Rowser
 	SqlRows *sql.Rows
 }
 
@@ -47,6 +50,7 @@ func (m *RowsImpl) Close() error {
 }
 
 type rowImpl struct {
+	Rower
 	SqlRows *sql.Rows
 }
 

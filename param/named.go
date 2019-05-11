@@ -18,6 +18,8 @@ import (
 const NamedPlaceholderPrefix = ":"
 
 type named struct {
+	Namer
+
 	// parameters represents the values passed to the object through repeated calls to Set and/or from initialization
 	parameters map[string]interface{}
 

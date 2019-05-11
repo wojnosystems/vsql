@@ -10,6 +10,7 @@ package param
 
 // appender holds the data used for the Query/Exec calls and allows you to build it as you go
 type appender struct {
+	Appender
 	parameters []interface{}
 	query      string
 }
