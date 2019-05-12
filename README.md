@@ -170,8 +170,6 @@ I started learning Go for a work project not too long ago. I've been struggling 
 
 One of my biggest pet peeves was in writing a function that implemented a database request and took in a `*sql.DB`. But that means that the code assumes that it's only run OUTSIDE of a transaction. If you wanted that call to run within a transaction, you had to write the method over again or take in an optional argument to represent an optional transaction state. But this is error-prone and extremely un-clean code. The method implementing a database call should not really care if it's in a transaction or not and should take in a vquery.Queryer instead of an object that advertises details about transactions.
 
-To overcome these problems, this library is essentially an interface facade that breaks up the parts based on functionality (imagine that!) and capability. For example, I was extremely perturbed using the database.sql library that I had to cast to a txn type because my calls could either be top-levels themselves OR transactions. These interfaces will hide the transaction status.
-
 However, because some databases (cough!--MYSQL--cough!) don't support nested transactions, I've split the interfaces based on the capabilities of the underlying database. One supports Nested Transactions, the other does not. The ONLY difference is that the NestedTransactionStarter returns a NestedTransactioner instead of just a Transactioner. This will help ensure that you write code to conform to the interfaces. If you decide you want to use nested transactions and move to a database that supports them, it should be as easy as changing which interfaces you use and adding the Begin calls that you need. However, the library that is implementing the vsql interfaces will need to support this.
 
 ## Contexts
@@ -269,7 +267,7 @@ backTicked := vsql.BT(original) // => "`mytable`"
 
 ## Transaction Wrapping
 
-Transactions require that you commit or roll them back after executing a set of statements. The `vsql.Txn` and `vsql.TxnNested` provides a clean way to perform transactions as a set. If you need to have transactions span to callers, then don't use these. If, however, you are composing downward dependent transactions (as in, you start a transaction and then perform queries/execs on that transaction or child transactions), this this is what you want.
+Transactions require that you commit or roll them back after executing a set of statements. The `vsql.Txn` and `vsql.TxnNested` provides a clean way to perform transactions as a set. If you need to have transactions span to callers, then don't use these, just call Begin with Commit/Rollback on your own. If, however, you are composing downward dependent transactions (as in, you start a transaction and then perform queries/execs on that transaction or child transactions), this this is what you want.
 
 These methods take care of Begin'ing the transaction and cleaning up after them using Commit/Rollback. In the event of a panic, Rollback is called. It can be used like this:
 
@@ -298,15 +296,28 @@ This begins a transaction, inserts the row, counts the row, then rolls the trans
 
 If you return an error, a rollback will be issued as well, but the error will be propagated up and returned to the caller of vsql.Txn.
 
-If your code emits a panic, your transaction will be rolled back, and the panic will be re-panic'ed after the rollback
+If your code emits a panic, your transaction will be rolled back, and the panic will be re-panic'ed after the rollback.
+
+There is another version of this function called TxnNested that does exactly the same thing, but the interfaces support spawning nested transactions.
+
+Again, you don't have to use these function to use transactions. This is merely a convenience method if you need to quickly group queries within a single or set of nested transactions.
 
 # License 
 
 Copyright 2019 Chris Wojno
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+and associated documentation files (the "Software"), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or 
+substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
