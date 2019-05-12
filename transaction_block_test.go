@@ -20,8 +20,8 @@ func TestTxn_Commit(t *testing.T) {
 		Once().
 		Return(qet, nil)
 
-	err := Txn(sqlerMock, ctx, nil, func(t QueryExecer) (rollback bool, err error) {
-		return
+	err := Txn(sqlerMock, ctx, nil, func(t QueryExecer) (commit bool, err error) {
+		return true, nil
 	})
 
 	if err != nil {
@@ -45,8 +45,8 @@ func TestTxn_Rollback(t *testing.T) {
 		Once().
 		Return(qet, nil)
 
-	err := Txn(sqlerMock, ctx, nil, func(t QueryExecer) (rollback bool, err error) {
-		return true, nil
+	err := Txn(sqlerMock, ctx, nil, func(t QueryExecer) (commit bool, err error) {
+		return
 	})
 
 	if err != nil {
@@ -71,8 +71,8 @@ func TestTxn_ErrRollback(t *testing.T) {
 		Once().
 		Return(qet, nil)
 
-	err := Txn(sqlerMock, ctx, nil, func(t QueryExecer) (rollback bool, err error) {
-		return false, forceErr
+	err := Txn(sqlerMock, ctx, nil, func(t QueryExecer) (commit bool, err error) {
+		return true, forceErr
 	})
 
 	if err != forceErr {
@@ -97,8 +97,9 @@ func TestTxn_PanicRollback(t *testing.T) {
 		Return(qet, nil)
 
 	assert.Panics(t, func() {
-		_ = Txn(sqlerMock, ctx, nil, func(t QueryExecer) (rollback bool, err error) {
-			return false, nil
+		_ = Txn(sqlerMock, ctx, nil, func(t QueryExecer) (commit bool, err error) {
+			panic("boom")
+			return true, nil
 		})
 	})
 
@@ -119,8 +120,8 @@ func TestTxnNested_Commit(t *testing.T) {
 		Once().
 		Return(qet, nil)
 
-	err := TxnNested(sqlerMock, ctx, nil, func(t QueryExecTransactioner) (rollback bool, err error) {
-		return
+	err := TxnNested(sqlerMock, ctx, nil, func(t QueryExecTransactioner) (commit bool, err error) {
+		return true, nil
 	})
 
 	if err != nil {
@@ -144,8 +145,8 @@ func TestTxnNested_Rollback(t *testing.T) {
 		Once().
 		Return(qet, nil)
 
-	err := TxnNested(sqlerMock, ctx, nil, func(t QueryExecTransactioner) (rollback bool, err error) {
-		return true, nil
+	err := TxnNested(sqlerMock, ctx, nil, func(t QueryExecTransactioner) (commit bool, err error) {
+		return false, nil
 	})
 
 	if err != nil {
@@ -170,8 +171,8 @@ func TestTxnNested_ErrRollback(t *testing.T) {
 		Once().
 		Return(qet, nil)
 
-	err := TxnNested(sqlerMock, ctx, nil, func(t QueryExecTransactioner) (rollback bool, err error) {
-		return false, forceErr
+	err := TxnNested(sqlerMock, ctx, nil, func(t QueryExecTransactioner) (commit bool, err error) {
+		return true, forceErr
 	})
 
 	if err != forceErr {
@@ -196,8 +197,9 @@ func TestTxnNested_PanicRollback(t *testing.T) {
 		Return(qet, nil)
 
 	assert.Panics(t, func() {
-		_ = TxnNested(sqlerMock, ctx, nil, func(t QueryExecTransactioner) (rollback bool, err error) {
-			return false, nil
+		_ = TxnNested(sqlerMock, ctx, nil, func(t QueryExecTransactioner) (commit bool, err error) {
+			panic("boom")
+			return true, nil
 		})
 	})
 

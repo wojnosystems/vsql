@@ -21,7 +21,7 @@ import (
 // @param txOps are the options to use when starting the transaction, or nil to use the default
 // @param block is the func closure to use within the transaction. When this method ends, the transaction will either be rolled back or committed. If you pass true for rollback or return non-nil for error, the transaction will be rolled back. If rollback is false (the default) and the err is nil (the default), then the transactions will be committed
 // @return err the error encountered during Begin, your block call, Rollback, or Commit
-func Txn(s SQLer, ctx context.Context, txOps vtxn.TxOptioner, block func(t QueryExecer) (rollback bool, err error)) (err error) {
+func Txn(s SQLer, ctx context.Context, txOps vtxn.TxOptioner, block func(t QueryExecer) (commit bool, err error)) (err error) {
 	var tx QueryExecTransactioner
 	tx, err = s.Begin(ctx, txOps)
 	if err != nil {
@@ -36,9 +36,9 @@ func Txn(s SQLer, ctx context.Context, txOps vtxn.TxOptioner, block func(t Query
 				panic(fmt.Errorf(`panic: %v\n%s`, r, debug.Stack()))
 			}
 		}()
-		rollback := true
-		rollback, err = block(tx)
-		if rollback || err != nil {
+		commit := true
+		commit, err = block(tx)
+		if !commit || err != nil {
 			_ = tx.Rollback()
 		} else {
 			err = tx.Commit()
@@ -68,9 +68,9 @@ func TxnNested(s NestedSQLer, ctx context.Context, txOps vtxn.TxOptioner, block 
 				panic(fmt.Errorf(`panic: %v\n%s`, r, debug.Stack()))
 			}
 		}()
-		rollback := true
-		rollback, err = block(tx)
-		if rollback || err != nil {
+		commit := true
+		commit, err = block(tx)
+		if !commit || err != nil {
 			_ = tx.Rollback()
 		} else {
 			err = tx.Commit()
