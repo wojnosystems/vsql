@@ -16,7 +16,7 @@ func TestCount(t *testing.T) {
 	rowMock.On("Scan", mock.Anything).
 		Once().
 		Return(nil)
-	rowMock.ScanTransform = func(values ...interface{}) {
+	rowMock.ScanMock = func(values ...interface{}) {
 		*values[0].(*ulong.ULong) = expectCount
 	}
 

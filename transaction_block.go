@@ -54,7 +54,7 @@ func Txn(s SQLer, ctx context.Context, txOps vtxn.TxOptioner, block func(t Query
 // @param block is the func closure to use within the transaction. When this method ends, the transaction will either be rolled back or committed. If you pass true for rollback or return non-nil for error, the transaction will be rolled back. If rollback is false (the default) and the err is nil (the default), then the transactions will be committed
 // @return err the error encountered during Begin, your block call, Rollback, or Commit
 func TxnNested(s NestedSQLer, ctx context.Context, txOps vtxn.TxOptioner, block func(t QueryExecTransactioner) (rollback bool, err error)) (err error) {
-	var tx QueryExecTransactioner
+	var tx NestedQueryExecTransactioner
 	tx, err = s.Begin(ctx, txOps)
 	if err != nil {
 		return

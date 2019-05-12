@@ -29,14 +29,14 @@ func (m *RowserMock) Close() error {
 
 type RowerMock struct {
 	mock.Mock
-	// ScanTransform allows you to edit the values of the scan to more adequately mock the request
-	ScanTransform func(values ...interface{})
+	// ScanMock allows you to edit the values of the scan to more adequately mock the request
+	ScanMock func(values ...interface{})
 }
 
 func (m *RowerMock) Scan(values ...interface{}) error {
 	a := m.Called(values)
-	if m.ScanTransform != nil {
-		m.ScanTransform(values...)
+	if m.ScanMock != nil {
+		m.ScanMock(values...)
 	}
 	return a.Error(0)
 }

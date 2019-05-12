@@ -56,6 +56,24 @@ func (m *QueryExecerMock) Exec(ctx context.Context, q param.Queryer) (vresult.Re
 	return r.(vresult.Resulter), a.Error(1)
 }
 
+func (m *QueryExecerMock) Begin(ctx context.Context, tx vtxn.TxOptioner) (NestedQueryExecTransactioner, error) {
+	a := m.Called(ctx, tx)
+	r := a.Get(0)
+	if r == nil {
+		return nil, a.Error(1)
+	}
+	return r.(NestedQueryExecTransactioner), a.Error(1)
+}
+
+func (m *QueryExecerMock) Prepare(ctx context.Context, q param.Queryer) (vstmt.Statementer, error) {
+	a := m.Called(ctx, q)
+	r := a.Get(0)
+	if r == nil {
+		return nil, a.Error(1)
+	}
+	return r.(vstmt.Statementer), a.Error(1)
+}
+
 type SQLerMock struct {
 	mock.Mock
 }
@@ -109,13 +127,13 @@ type NestedSQLerMock struct {
 	mock.Mock
 }
 
-func (m *NestedSQLerMock) Begin(ctx context.Context, tx vtxn.TxOptioner) (NestedTransactioner, error) {
+func (m *NestedSQLerMock) Begin(ctx context.Context, tx vtxn.TxOptioner) (NestedQueryExecTransactioner, error) {
 	a := m.Called(ctx, tx)
 	r := a.Get(0)
 	if r == nil {
 		return nil, a.Error(1)
 	}
-	return r.(NestedTransactioner), a.Error(1)
+	return r.(NestedQueryExecTransactioner), a.Error(1)
 }
 func (m *NestedSQLerMock) Prepare(ctx context.Context, q param.Queryer) (vstmt.Statementer, error) {
 	a := m.Called(ctx, q)
@@ -184,11 +202,66 @@ type NestedTransactionStarterMock struct {
 	mock.Mock
 }
 
-func (m *NestedTransactionStarterMock) Begin(ctx context.Context, tx vtxn.TxOptioner) (NestedTransactioner, error) {
+func (m *NestedTransactionStarterMock) Begin(ctx context.Context, tx vtxn.TxOptioner) (NestedQueryExecTransactioner, error) {
 	a := m.Called(ctx, tx)
 	r := a.Get(0)
 	if r == nil {
 		return nil, a.Error(1)
 	}
-	return r.(NestedTransactioner), a.Error(1)
+	return r.(NestedQueryExecTransactioner), a.Error(1)
+}
+
+type QueryExecTransactionerMock struct {
+	QueryExecerMock
+}
+
+func (m *QueryExecTransactionerMock) Commit() error {
+	a := m.Called()
+	return a.Error(0)
+}
+
+func (m *QueryExecTransactionerMock) Rollback() error {
+	a := m.Called()
+	return a.Error(0)
+}
+
+func (m *QueryExecTransactionerMock) Prepare(ctx context.Context, q param.Queryer) (vstmt.Statementer, error) {
+	a := m.Called(ctx, q)
+	r := a.Get(0)
+	if r == nil {
+		return nil, a.Error(1)
+	}
+	return r.(vstmt.Statementer), a.Error(1)
+}
+
+type NestedQueryExecTransactionerMock struct {
+	QueryExecerMock
+}
+
+func (m *NestedQueryExecTransactionerMock) Commit() error {
+	a := m.Called()
+	return a.Error(0)
+}
+
+func (m *NestedQueryExecTransactionerMock) Rollback() error {
+	a := m.Called()
+	return a.Error(0)
+}
+
+func (m *NestedQueryExecTransactionerMock) Begin(ctx context.Context, tx vtxn.TxOptioner) (NestedQueryExecTransactioner, error) {
+	a := m.Called(ctx, tx)
+	r := a.Get(0)
+	if r == nil {
+		return nil, a.Error(1)
+	}
+	return r.(NestedQueryExecTransactioner), a.Error(1)
+}
+
+func (m *NestedQueryExecTransactionerMock) Prepare(ctx context.Context, q param.Queryer) (vstmt.Statementer, error) {
+	a := m.Called(ctx, q)
+	r := a.Get(0)
+	if r == nil {
+		return nil, a.Error(1)
+	}
+	return r.(vstmt.Statementer), a.Error(1)
 }

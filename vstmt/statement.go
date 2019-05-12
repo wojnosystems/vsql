@@ -18,15 +18,39 @@ import (
 
 // Statements are inherently database-specific. Implementations are located with the driver
 type StatementQueryer interface {
+	// Query the database for read-only results. If you need to insert or update/edit, use Inserter or Execer, respectively
+	// @param ctx Context to constrain the run-time of this call
+	// @param query the SQL vquery and parameters to use in the call
+	// @return rows the results, or nil if an error was encountered
+	// @return err errors encountered while making the database call. Database-specific errors are likely
 	Query(ctx context.Context, query param.Parameterer) (rows vrows.Rowser, err error)
 }
 
 type StatementInserter interface {
+	// Insert a vrow into the database
+	// @param ctx Context to constrain the run-time of this call
+	// @param query the SQL vquery and parameters to use in the call
+	// @return result the outcome of the insert, or nil if an error was encountered
+	// @return err errors encountered while making the database call. Database-specific errors are likely
 	Insert(ctx context.Context, query param.Parameterer) (result vresult.InsertResulter, err error)
 }
 
 type StatementExecer interface {
+	// Exec the database for update/edit requests
+	// @param ctx Context to constrain the run-time of this call
+	// @param query the SQL vquery and parameters to use in the call
+	// @return rows the results, or nil if an error was encountered
+	// @return err errors encountered while making the database call. Database-specific errors are likely
 	Exec(ctx context.Context, query param.Parameterer) (result vresult.Resulter, err error)
+}
+
+type Preparer interface {
+	// Prepare a query for later execution with values. This produces a compiled statement
+	// @param ctx Context to constrain the run-time of this call
+	// @param query the SQL query without parameters
+	// @return stmt is the prepared statement object ready for execution with real data, or nil if an error was encountered
+	// @return err errors encountered while making the database call. Database-specific errors are likely
+	Prepare(ctx context.Context, query param.Queryer) (stmt Statementer, err error)
 }
 
 type Statementer interface {
@@ -34,8 +58,4 @@ type Statementer interface {
 	StatementQueryer
 	StatementInserter
 	StatementExecer
-}
-
-type Preparer interface {
-	Prepare(ctx context.Context, query param.Queryer) (stmt Statementer, err error)
 }

@@ -14,10 +14,12 @@ import (
 )
 
 type Resulter interface {
+	// RowsAffected is the number of rows created or modified in the previous Exec/Insert call. Not all databases support this
 	RowsAffected() (rowsAffected ulong.ULong, err error)
 }
 
 type InsertResulter interface {
+	// LastInsertId is the ID of the row most recently created by the Insert call. Not all databases support this
 	LastInsertId() (id ulong.ULong, err error)
 	Resulter
 }

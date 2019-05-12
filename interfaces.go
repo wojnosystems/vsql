@@ -14,21 +14,26 @@ import (
 	"github.com/wojnosystems/vsql/vstmt"
 )
 
-type QueryExecer interface {
-	vquery.Queryer
-	vquery.Inserter
-	vquery.Execer
-	vstmt.Preparer
-}
-
+// SQLer is what most database references should use to identify a database "connection"
 type SQLer interface {
 	TransactionStarter
 	pinger.Pinger
 	QueryExecer
 }
 
+// NestedSQLer is what database references that support nested transactions should use to identify a database "connection"
+// It's the nested transaction version of SQLer
 type NestedSQLer interface {
 	NestedTransactionStarter
 	pinger.Pinger
 	QueryExecer
+}
+
+// QueryExecer is the interface to use in functions that need to execute queries without knowing the current transaction state.
+// If you're writing methods that CRUD objects/resources, use this interface. If you're sure you only need to read, use Queryer, if you need to exec arbitrary queries, use Execer. Use Inserter if you need to insert values and get the LastInsertId
+type QueryExecer interface {
+	vquery.Queryer
+	vquery.Inserter
+	vquery.Execer
+	vstmt.Preparer
 }
