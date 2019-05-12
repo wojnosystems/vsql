@@ -21,10 +21,10 @@ type SQLer interface {
 	QueryExecer
 }
 
-// NestedSQLer is what database references that support nested transactions should use to identify a database "connection"
+// SQLNester is what database references that support nested transactions should use to identify a database "connection"
 // It's the nested transaction version of SQLer
-type NestedSQLer interface {
-	NestedTransactionStarter
+type SQLNester interface {
+	TransactionNestedStarter
 	pinger.Pinger
 	QueryExecer
 }

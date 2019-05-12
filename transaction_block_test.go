@@ -125,12 +125,12 @@ func TestTxn_PanicRollback(t *testing.T) {
 func TestTxnNested_Commit(t *testing.T) {
 	ctx := context.Background()
 
-	qet := &NestedQueryExecTransactionerMock{}
+	qet := &QueryExecNestedTransactionerMock{}
 	qet.On("Commit").
 		Once().
 		Return(nil)
 
-	sqlerMock := &NestedSQLerMock{}
+	sqlerMock := &SQLNesterMock{}
 	sqlerMock.On("Begin", ctx, nil).
 		Once().
 		Return(qet, nil)
@@ -155,7 +155,7 @@ func TestTxnNested_Rollback(t *testing.T) {
 		Once().
 		Return(nil)
 
-	sqlerMock := &NestedSQLerMock{}
+	sqlerMock := &SQLNesterMock{}
 	sqlerMock.On("Begin", ctx, nil).
 		Once().
 		Return(qet, nil)
@@ -181,7 +181,7 @@ func TestTxnNested_ErrRollback(t *testing.T) {
 		Once().
 		Return(nil)
 
-	sqlerMock := &NestedSQLerMock{}
+	sqlerMock := &SQLNesterMock{}
 	sqlerMock.On("Begin", ctx, nil).
 		Once().
 		Return(qet, nil)
@@ -206,7 +206,7 @@ func TestTxnNested_PanicRollback(t *testing.T) {
 		Once().
 		Return(nil)
 
-	sqlerMock := &NestedSQLerMock{}
+	sqlerMock := &SQLNesterMock{}
 	sqlerMock.On("Begin", ctx, nil).
 		Once().
 		Return(qet, nil)

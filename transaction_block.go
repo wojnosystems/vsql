@@ -55,13 +55,13 @@ func Txn(s SQLer, ctx context.Context, txOps vtxn.TxOptioner, block func(t Query
 }
 
 // TxnNested creates a transaction in a block but also allows for nested transactions, assuming the implementation supports that
-// @param s is the database connection (NestedSQLer interface implementation) to use to start the transaction
+// @param s is the database connection (SQLNester interface implementation) to use to start the transaction
 // @param ctx is the context to use when starting the transaction
 // @param txOps are the options to use when starting the transaction, or nil to use the default
 // @param block is the func closure to use within the transaction. When this method ends, the transaction will either be rolled back or committed. If you pass true for rollback or return non-nil for error, the transaction will be rolled back. If rollback is false (the default) and the err is nil (the default), then the transactions will be committed
 // @return err the error encountered during Begin, your block call, Rollback, or Commit
-func TxnNested(s NestedSQLer, ctx context.Context, txOps vtxn.TxOptioner, block func(t QueryExecTransactioner) (rollback bool, err error)) (err error) {
-	var tx NestedQueryExecTransactioner
+func TxnNested(s SQLNester, ctx context.Context, txOps vtxn.TxOptioner, block func(t QueryExecTransactioner) (rollback bool, err error)) (err error) {
+	var tx QueryExecNestedTransactioner
 	tx, err = s.Begin(ctx, txOps)
 	if err != nil {
 		return

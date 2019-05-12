@@ -39,14 +39,14 @@ type QueryExecTransactioner interface {
 	QueryExecer
 }
 
-// NestedQueryExecTransactioner is just like Transactioner but these objects can start sub-transactions
+// QueryExecNestedTransactioner is just like Transactioner but these objects can start sub-transactions
 // You should avoid using this unless you absolutely need to know that you're in a transaction or you must start sub-transactions
-type NestedQueryExecTransactioner interface {
+type QueryExecNestedTransactioner interface {
 	QueryExecTransactioner
-	NestedTransactionStarter
+	TransactionNestedStarter
 }
 
-type NestedTransactionStarter interface {
+type TransactionNestedStarter interface {
 	// Begin starts a transaction and then returns a transaction context that is able to start transactions of its own
-	Begin(context.Context, vtxn.TxOptioner) (nt NestedQueryExecTransactioner, err error)
+	Begin(context.Context, vtxn.TxOptioner) (nt QueryExecNestedTransactioner, err error)
 }
