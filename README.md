@@ -1,5 +1,11 @@
 # Getting started
 
+## Who is this library for?
+
+This library is for any developer that needs to use databases in Go. However, this module cannot do that alone. It requires the vsql_mysql or vsql_postgres to do the actual work. These modules, in turn, rely on the vsql_engine to do their job as well.
+
+The example below is just for MySQL as that was the first one that I wrote. Please see the other modules if you need other databases.
+
 ## What is this?
 
 This? This is a library, really. It's a facade around the built-in database/sql package provided by Go. This module itself is just the facade and a few helper methods I've written over and over again in various forms throughout my Go+Database career. To use this module, you need to pair it with another module that implements these interfaces, but for the database you wish to use, such as vsql_mysql or vsql_postgres.
@@ -91,7 +97,7 @@ func getAllAges(ctx context.Context, db vquery.Queryer) (ages []int) {
 	// QueryEach each also handles cleaning up after the row and results
 	err := vrow.QueryEach(db, ctx,
 		param.NewNamedWithData(
-			`SELECT name, age FROM mytable WHERE name = :name LIMIT 1000`,
+			`SELECT age FROM mytable WHERE name = :name LIMIT 1000`,
 			vsql.H{"name": "chris",}),
 		// Do something with each row. This is the code that extracts data from the query
 		func(r vrows.Rower) (stop bool, err error) {

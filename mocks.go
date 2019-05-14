@@ -158,6 +158,10 @@ func (m *SQLNesterMock) Ping(ctx context.Context) error {
 	a := m.Called(ctx)
 	return a.Error(0)
 }
+func (m *SQLNesterMock) Close() error {
+	a := m.Called()
+	return a.Error(0)
+}
 func (m *SQLNesterMock) Query(ctx context.Context, q param.Queryer) (vrows.Rowser, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
