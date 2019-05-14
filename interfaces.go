@@ -12,6 +12,7 @@ import (
 	"github.com/wojnosystems/vsql/pinger"
 	"github.com/wojnosystems/vsql/vquery"
 	"github.com/wojnosystems/vsql/vstmt"
+	"io"
 )
 
 // SQLer is what most database references should use to identify a database "connection"
@@ -19,6 +20,7 @@ type SQLer interface {
 	TransactionStarter
 	pinger.Pinger
 	QueryExecer
+	io.Closer
 }
 
 // SQLNester is what database references that support nested transactions should use to identify a database "connection"
@@ -27,6 +29,7 @@ type SQLNester interface {
 	TransactionNestedStarter
 	pinger.Pinger
 	QueryExecer
+	io.Closer
 }
 
 // QueryExecer is the interface to use in functions that need to execute queries without knowing the current transaction state.

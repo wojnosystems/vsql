@@ -16,7 +16,6 @@
 package vresult
 
 import (
-	"database/sql"
 	"github.com/wojnosystems/vsql/ulong"
 )
 
@@ -29,28 +28,4 @@ type InsertResulter interface {
 	// LastInsertId is the ID of the row most recently created by the Insert call. Not all databases support this
 	LastInsertId() (id ulong.ULong, err error)
 	Resulter
-}
-
-// QueryResult is the implementation of the Resulter interface
-type QueryResult struct {
-	Resulter
-	SqlRes sql.Result
-}
-
-// RowsAffected is the number of vrows that were altered/created/deleted from the call that produced this Resulter
-func (r *QueryResult) RowsAffected() (ulong.ULong, error) {
-	v, err := r.SqlRes.RowsAffected()
-	if err != nil {
-		v = 0
-	}
-	return ulong.NewInt64(v), err
-}
-
-// RowsAffected is ID of the vrow that was inserted from the call that produced this Resulter. Not all databases support this
-func (r *QueryResult) LastInsertId() (ulong.ULong, error) {
-	v, err := r.SqlRes.LastInsertId()
-	if err != nil {
-		v = 0
-	}
-	return ulong.NewInt64(v), err
 }

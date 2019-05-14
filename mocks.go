@@ -105,6 +105,10 @@ func (m *SQLerMock) Ping(ctx context.Context) error {
 	a := m.Called(ctx)
 	return a.Error(0)
 }
+func (m *SQLerMock) Close() error {
+	a := m.Called()
+	return a.Error(0)
+}
 func (m *SQLerMock) Query(ctx context.Context, q param.Queryer) (vrows.Rowser, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)

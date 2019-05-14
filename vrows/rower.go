@@ -16,7 +16,6 @@
 package vrows
 
 import (
-	"database/sql"
 	"io"
 )
 
@@ -33,42 +32,4 @@ type Rower interface {
 
 	// Scan reads values from the vresult and inserts them into the pointers passed in as arguments
 	Scan(destination ...interface{}) (err error)
-}
-
-// RowsImpl is the implementation of the Rowser interface
-// this is exported and rowImpl is not as this can be used by implementing libraries to avoid having to write their own implementations, if they so desire.
-// Note to people using this module/package, unless you're writing a driver, you probably shouldn't be using this. You should use the Rowser interface instead
-type RowsImpl struct {
-	Rowser
-	SqlRows *sql.Rows
-}
-
-// Next calls Next() on the sql.Rows object
-func (m *RowsImpl) Next() Rower {
-	if m.SqlRows.Next() {
-		return &rowImpl{SqlRows: m.SqlRows}
-	}
-	return nil
-}
-
-// Close cleans up the Rows object, releasing it's object back to the pool. Call this when you're done with your vquery results
-func (m *RowsImpl) Close() error {
-	return m.SqlRows.Close()
-}
-
-type rowImpl struct {
-	Rower
-	SqlRows *sql.Rows
-}
-
-// Scan calls Scan() on the sql.Rows object and is the primary way to convert values from SQL into Go-native objects
-func (m *rowImpl) Scan(dest ...interface{}) error {
-	return m.SqlRows.Scan(dest...)
-}
-
-// Columns returns a list of columns available for this vrow
-func (m *rowImpl) Columns() (columnNames []string) {
-	// #NOERR: Will never error as this cannot be used while the vrow is closed
-	columnNames, _ = m.SqlRows.Columns()
-	return
 }
