@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/wojnosystems/vsql/vtxn"
+	"log"
 	"runtime/debug"
 )
 
@@ -35,17 +36,22 @@ func Txn(s SQLer, ctx context.Context, txOps vtxn.TxOptioner, block func(t Query
 		return
 	}
 	func() {
+		// didAttemptRollback guards against an infinite loop recursion with rollback triggering crashes that are un-caught
+		didAttemptRollback := false
 		defer func() {
 			// This defer ensures that we rollback transactions, even when panics occur
 			if r := recover(); r != nil {
-				_ = tx.Rollback()
+				if !didAttemptRollback {
+					_ = tx.Rollback()
+				}
 				// regurgitate the panic for debugging
-				panic(fmt.Errorf(`panic: %v\n%s`, r, debug.Stack()))
+				log.Fatal(fmt.Errorf(`panic: %v\n%s`, r, debug.Stack()))
 			}
 		}()
 		commit := true
 		commit, err = block(tx)
 		if !commit || err != nil {
+			didAttemptRollback = true
 			_ = tx.Rollback()
 		} else {
 			err = tx.Commit()
@@ -67,17 +73,22 @@ func TxnNested(s SQLNester, ctx context.Context, txOps vtxn.TxOptioner, block fu
 		return
 	}
 	func() {
+		// didAttemptRollback guards against an infinite loop recursion with rollback triggering crashes that are un-caught
+		didAttemptRollback := false
 		defer func() {
 			// This defer ensures that we rollback transactions, even when panics occur
 			if r := recover(); r != nil {
-				_ = tx.Rollback()
+				if !didAttemptRollback {
+					_ = tx.Rollback()
+				}
 				// regurgitate the panic for debugging
-				panic(fmt.Errorf(`panic: %v\n%s`, r, debug.Stack()))
+				log.Fatal(fmt.Errorf(`panic: %v\n%s`, r, debug.Stack()))
 			}
 		}()
 		commit := true
 		commit, err = block(tx)
 		if !commit || err != nil {
+			didAttemptRollback = true
 			_ = tx.Rollback()
 		} else {
 			err = tx.Commit()
