@@ -15,6 +15,8 @@
 
 package param
 
+import "github.com/wojnosystems/vsql/interpolation_strategy"
+
 // appender holds the data used for the Query/Exec calls and allows you to build it as you go
 type appender struct {
 	Appender
@@ -27,6 +29,14 @@ func NewAppend(query string) Appender {
 	return &appender{
 		query:      query,
 		parameters: make([]interface{}, 0, 1),
+	}
+}
+
+// NewAppendData creates a new appending Parameterer in which you can repeatedly append values to the parameter list as desired, but this has no query string
+func NewAppendData(data ...interface{}) Appender {
+	return &appender{
+		query:      "",
+		parameters: data,
 	}
 }
 
@@ -45,10 +55,10 @@ func (p *appender) Append(value interface{}) {
 	p.parameters = append(p.parameters, value)
 }
 
-func (p *appender) SQLQuery(strategy InterpolateStrategy) string {
+func (p *appender) SQLQuery(strategy interpolation_strategy.InterpolateStrategy) string {
 	return p.query
 }
 
-func (p *appender) Interpolate(strategy InterpolateStrategy) (query string, params []interface{}, err error) {
+func (p *appender) Interpolate(strategy interpolation_strategy.InterpolateStrategy) (query string, params []interface{}, err error) {
 	return p.query, p.parameters, nil
 }

@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../sqlface/.idea/sqlface.iml" filepath="$PROJECT_DIR$/../sqlface/.idea/sqlface.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/vsql.iml" filepath="$PROJECT_DIR$/.idea/vsql.iml" />
     </modules>
   </component>

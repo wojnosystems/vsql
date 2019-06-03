@@ -17,6 +17,7 @@ package param
 
 import (
 	"fmt"
+	"github.com/wojnosystems/vsql/interpolation_strategy"
 	"regexp"
 	"strings"
 )
@@ -30,23 +31,23 @@ type named struct {
 	// parameters represents the values passed to the object through repeated calls to Set and/or from initialization
 	parameters map[string]interface{}
 
-	// vquery is the SQL with the named-placeholders already in the string
+	// query is the SQL with the named-placeholders already in the string
 	query string
 
 	// cached values after interpolate is run
 	// Saves work. Reset both by setting queryNormalized to empty string, this will trigger a full re-run
-	// queryNormalized is the `vquery` value transformed back into a driver-specific format
+	// queryNormalized is the `query` value transformed back into a driver-specific format
 	queryNormalized string
 
-	// orderedNamedParameters is the name of keys to look up in the order that the values of those keys need to appear in the parameterized vquery
+	// orderedNamedParameters is the name of keys to look up in the order that the values of those keys need to appear in the parameterized query
 	orderedNamedParameters []string
 }
 
-// NewNamed creates a new named vquery
-// @param vquery is the SQL you wish to execute. When you want to insert a value, use the colon (:) to denote the start of a named parameter. e.g. ":name"
+// NewNamed creates a new named query
+// @param query is the SQL you wish to execute. When you want to insert a value, use the colon (:) to denote the start of a named parameter. e.g. ":name"
 // @return the Queryer-conforming parameterer
 // @example
-//   vquery: "select * from users where name = :name AND :age = years_old"
+//   query: "select * from users where name = :name AND :age = years_old"
 //   data: map[string]interface{}{"name": "bob", "age": 21}
 //   queries for: users named "bob" who are 21 years old
 func NewNamed(query string) Namer {
@@ -56,18 +57,33 @@ func NewNamed(query string) Namer {
 	}
 }
 
-// NewNamedWithData creates a new named vquery and also allows you to pass in named parameters
-// This makes one-line vquery-building easier
-// @param vquery is the SQL you wish to execute. When you want to insert a value, use the colon (:) to denote the start of a named parameter. e.g. ":name"
-// @param data are the key-value pairs for the parameterized values you wish to use with the vquery
+// NewNamedWithData creates a new named query and also allows you to pass in named parameters
+// This makes one-line query-building easier
+// @param query is the SQL you wish to execute. When you want to insert a value, use the colon (:) to denote the start of a named parameter. e.g. ":name"
+// @param data are the key-value pairs for the parameterized values you wish to use with the query
 // @return the Queryer-conforming parameterer
 // @example
-//   vquery: "select * from users where name = :name AND :age = years_old"
+//   query: "select * from users where name = :name AND :age = years_old"
 //   data: map[string]interface{}{"name": "bob", "age": 21}
 //   queries for: users named "bob" who are 21 years old
 func NewNamedWithData(query string, data map[string]interface{}) Namer {
 	return &named{
 		query:      query,
+		parameters: data,
+	}
+}
+
+// NewNamedData creates a new named query and also allows you to pass in named parameters, but not a string query
+// This makes one-line query-building easier
+// @param data are the key-value pairs for the parameterized values you wish to use with the query
+// @return the Queryer-conforming parameterer
+// @example
+//   query: "select * from users where name = :name AND :age = years_old"
+//   data: map[string]interface{}{"name": "bob", "age": 21}
+//   queries for: users named "bob" who are 21 years old
+func NewNamedData(data map[string]interface{}) Namer {
+	return &named{
+		query:      "",
 		parameters: data,
 	}
 }
@@ -78,12 +94,12 @@ func (p *named) Set(key string, value interface{}) {
 	p.queryNormalized = ""
 }
 
-func (p *named) SQLQuery(strategy InterpolateStrategy) string {
+func (p *named) SQLQuery(strategy interpolation_strategy.InterpolateStrategy) string {
 	p.normalizeSQL(strategy)
 	return p.queryNormalized
 }
 
-func (p *named) Interpolate(strategy InterpolateStrategy) (query string, params []interface{}, err error) {
+func (p *named) Interpolate(strategy interpolation_strategy.InterpolateStrategy) (query string, params []interface{}, err error) {
 	p.normalizeSQL(strategy)
 	orderedParams := make([]interface{}, 0, len(p.parameters))
 	for _, key := range p.orderedNamedParameters {
@@ -103,7 +119,7 @@ func (p *named) Interpolate(strategy InterpolateStrategy) (query string, params 
 // normalizeSQL stores this value in a cached internal field in case Interpolate is called multiple times
 //
 // @param strategy is how to insert placeholder for the driver-specific format
-func (p *named) normalizeSQL(strategy InterpolateStrategy) {
+func (p *named) normalizeSQL(strategy interpolation_strategy.InterpolateStrategy) {
 	if len(p.queryNormalized) == 0 {
 		replacementCount := strings.Count(p.query, NamedPlaceholderPrefix)
 		p.orderedNamedParameters = make([]string, 0, replacementCount)

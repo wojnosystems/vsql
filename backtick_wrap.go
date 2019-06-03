@@ -18,6 +18,7 @@ package vsql
 import "fmt"
 
 // BT wraps the value in backticks. No escaping is performed. This is assumed this is for table names
+// Note: do not put variables in back-ticks. Most SQL engines will not inject values between backticks for safety reasons
 func BT(s string) string {
 	return fmt.Sprintf("`%s`", s)
 }
