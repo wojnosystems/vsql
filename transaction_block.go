@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/wojnosystems/vsql/vtxn"
-	"log"
 	"runtime/debug"
 )
 
@@ -45,7 +44,7 @@ func Txn(s SQLer, ctx context.Context, txOps vtxn.TxOptioner, block func(t Query
 					_ = tx.Rollback()
 				}
 				// regurgitate the panic for debugging
-				log.Fatal(fmt.Errorf(`panic: %v\n%s`, r, debug.Stack()))
+				err = fmt.Errorf(`panic: %v\n%s`, r, debug.Stack())
 			}
 		}()
 		commit := true
@@ -82,7 +81,7 @@ func TxnNested(s SQLNester, ctx context.Context, txOps vtxn.TxOptioner, block fu
 					_ = tx.Rollback()
 				}
 				// regurgitate the panic for debugging
-				log.Fatal(fmt.Errorf(`panic: %v\n%s`, r, debug.Stack()))
+				err = fmt.Errorf(`panic: %v\n%s`, r, debug.Stack())
 			}
 		}()
 		commit := true

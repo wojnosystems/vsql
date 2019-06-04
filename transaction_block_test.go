@@ -18,7 +18,6 @@ package vsql
 import (
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -111,12 +110,14 @@ func TestTxn_PanicRollback(t *testing.T) {
 		Once().
 		Return(qet, nil)
 
-	assert.Panics(t, func() {
-		_ = Txn(sqlerMock, ctx, nil, func(t QueryExecer) (commit bool, err error) {
-			panic("boom")
-			return true, nil
-		})
+	err := Txn(sqlerMock, ctx, nil, func(t QueryExecer) (commit bool, err error) {
+		panic("boom")
+		return true, nil
 	})
+
+	if err == nil {
+		t.Error("expected a panic error")
+	}
 
 	sqlerMock.AssertExpectations(t)
 	qet.AssertExpectations(t)
@@ -211,12 +212,14 @@ func TestTxnNested_PanicRollback(t *testing.T) {
 		Once().
 		Return(qet, nil)
 
-	assert.Panics(t, func() {
-		_ = TxnNested(sqlerMock, ctx, nil, func(t QueryExecTransactioner) (commit bool, err error) {
-			panic("boom")
-			return true, nil
-		})
+	err := TxnNested(sqlerMock, ctx, nil, func(t QueryExecTransactioner) (commit bool, err error) {
+		panic("boom")
+		return true, nil
 	})
+
+	if err == nil {
+		t.Error("expected a panic error")
+	}
 
 	sqlerMock.AssertExpectations(t)
 	qet.AssertExpectations(t)
