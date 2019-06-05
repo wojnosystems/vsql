@@ -13,12 +13,25 @@
 // OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package param
+package vparam
 
-// New creates a new appending Parameterer, but is intended to not have parameterized values added to it. This is just a convenience method for an Appender with no parameters to append (but you CAN append values if you change your mind later)
-func New(query string) Appender {
-	return &appender{
-		query:      query,
-		parameters: make([]interface{}, 0),
-	}
+import (
+	"github.com/stretchr/testify/mock"
+	"github.com/wojnosystems/vsql/interpolation_strategy"
+)
+
+type QueryerMock struct {
+	mock.Mock
+}
+
+func (q *QueryerMock) Interpolate(strategy interpolation_strategy.InterpolateStrategy) (query string, params []interface{}, err error) {
+	a := q.Called(strategy)
+	query = a.Get(0).(string)
+	params = a.Get(1).([]interface{})
+	err = a.Error(2)
+	return
+}
+func (q *QueryerMock) SQLQuery(strategy interpolation_strategy.InterpolateStrategy) string {
+	a := q.Called(strategy)
+	return a.Get(0).(string)
 }

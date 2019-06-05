@@ -19,7 +19,7 @@ import "context"
 
 type Pinger interface {
 	// Ping checks the connectivity of the database.
-	// @param ctx is a deadline/timeout for this call
+	// @vparam ctx is a deadline/timeout for this call
 	// @return err nil if everything is fine, an error if something is wrong
 	Ping(ctx context.Context) (err error)
 }

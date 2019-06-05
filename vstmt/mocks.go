@@ -18,7 +18,7 @@ package vstmt
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
-	"github.com/wojnosystems/vsql/param"
+	"github.com/wojnosystems/vsql/vparam"
 	"github.com/wojnosystems/vsql/vresult"
 	"github.com/wojnosystems/vsql/vrows"
 )
@@ -27,7 +27,7 @@ type StatementQueryerMock struct {
 	mock.Mock
 }
 
-func (s *StatementQueryerMock) Query(ctx context.Context, query param.Parameterer) (r vrows.Rowser, err error) {
+func (s *StatementQueryerMock) Query(ctx context.Context, query vparam.Parameterer) (r vrows.Rowser, err error) {
 	a := s.Called(ctx, query)
 	if a.Get(0) != nil {
 		r = a.Get(0).(vrows.Rowser)
@@ -40,7 +40,7 @@ type StatementInserterMock struct {
 	mock.Mock
 }
 
-func (s *StatementInserterMock) Insert(ctx context.Context, query param.Parameterer) (r vresult.InsertResulter, err error) {
+func (s *StatementInserterMock) Insert(ctx context.Context, query vparam.Parameterer) (r vresult.InsertResulter, err error) {
 	a := s.Called(ctx, query)
 	if a.Get(0) != nil {
 		r = a.Get(0).(vresult.InsertResulter)
@@ -53,7 +53,7 @@ type StatementExecerMock struct {
 	mock.Mock
 }
 
-func (s *StatementExecerMock) Exec(ctx context.Context, query param.Parameterer) (r vresult.Resulter, err error) {
+func (s *StatementExecerMock) Exec(ctx context.Context, query vparam.Parameterer) (r vresult.Resulter, err error) {
 	a := s.Called(ctx, query)
 	if a.Get(0) != nil {
 		r = a.Get(0).(vresult.Resulter)
@@ -66,7 +66,7 @@ type StatementerMock struct {
 	mock.Mock
 }
 
-func (s *StatementerMock) Query(ctx context.Context, query param.Parameterer) (r vrows.Rowser, err error) {
+func (s *StatementerMock) Query(ctx context.Context, query vparam.Parameterer) (r vrows.Rowser, err error) {
 	a := s.Called(ctx, query)
 	if a.Get(0) != nil {
 		r = a.Get(0).(vrows.Rowser)
@@ -74,7 +74,7 @@ func (s *StatementerMock) Query(ctx context.Context, query param.Parameterer) (r
 	err = a.Error(1)
 	return
 }
-func (s *StatementerMock) Insert(ctx context.Context, query param.Parameterer) (r vresult.InsertResulter, err error) {
+func (s *StatementerMock) Insert(ctx context.Context, query vparam.Parameterer) (r vresult.InsertResulter, err error) {
 	a := s.Called(ctx, query)
 	if a.Get(0) != nil {
 		r = a.Get(0).(vresult.InsertResulter)
@@ -82,7 +82,7 @@ func (s *StatementerMock) Insert(ctx context.Context, query param.Parameterer) (
 	err = a.Error(1)
 	return
 }
-func (s *StatementerMock) Exec(ctx context.Context, query param.Parameterer) (r vresult.Resulter, err error) {
+func (s *StatementerMock) Exec(ctx context.Context, query vparam.Parameterer) (r vresult.Resulter, err error) {
 	a := s.Called(ctx, query)
 	if a.Get(0) != nil {
 		r = a.Get(0).(vresult.Resulter)
@@ -100,7 +100,7 @@ type PreparerMock struct {
 	mock.Mock
 }
 
-func (s *PreparerMock) Prepare(ctx context.Context, query param.Queryer) (st Statementer, err error) {
+func (s *PreparerMock) Prepare(ctx context.Context, query vparam.Queryer) (st Statementer, err error) {
 	a := s.Called(ctx, query)
 	if a.Get(0) != nil {
 		st = a.Get(0).(Statementer)

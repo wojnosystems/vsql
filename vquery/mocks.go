@@ -18,7 +18,7 @@ package vquery
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
-	"github.com/wojnosystems/vsql/param"
+	"github.com/wojnosystems/vsql/vparam"
 	"github.com/wojnosystems/vsql/vresult"
 	"github.com/wojnosystems/vsql/vrows"
 )
@@ -27,7 +27,7 @@ type QueryerMock struct {
 	mock.Mock
 }
 
-func (m *QueryerMock) Query(ctx context.Context, q param.Queryer) (vrows.Rowser, error) {
+func (m *QueryerMock) Query(ctx context.Context, q vparam.Queryer) (vrows.Rowser, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -40,7 +40,7 @@ type InserterMock struct {
 	mock.Mock
 }
 
-func (m *InserterMock) Insert(ctx context.Context, q param.Queryer) (vresult.InsertResulter, error) {
+func (m *InserterMock) Insert(ctx context.Context, q vparam.Queryer) (vresult.InsertResulter, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -53,7 +53,7 @@ type ExecerMock struct {
 	mock.Mock
 }
 
-func (m *ExecerMock) Exec(ctx context.Context, q param.Queryer) (vresult.Resulter, error) {
+func (m *ExecerMock) Exec(ctx context.Context, q vparam.Queryer) (vresult.Resulter, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {

@@ -18,7 +18,7 @@ package vrow
 import (
 	"context"
 	"database/sql"
-	"github.com/wojnosystems/vsql/param"
+	"github.com/wojnosystems/vsql/vparam"
 	"github.com/wojnosystems/vsql/vquery"
 	"github.com/wojnosystems/vsql/vrows"
 )
@@ -27,8 +27,8 @@ import (
 //
 // Each will also handle cleaning up the Rowser record when it returns, preventing memory leaks
 //
-// @param r comes from Query() calls
-// @param eachRow is a predicate to call for each vrow encountered. Return false, nil to keep going. Return true, nil to stop the loop and clean up the vrow. If you return an error, that error will be passed to the caller of Each and iteration will stop as well.
+// @vparam r comes from Query() calls
+// @vparam eachRow is a predicate to call for each vrow encountered. Return false, nil to keep going. Return true, nil to stop the loop and clean up the vrow. If you return an error, that error will be passed to the caller of Each and iteration will stop as well.
 // @return err the database error encountered or that was returned from eachRow
 //
 // this will not return that annoying sql.ErrNoRows error. Usually, you're building an array with this and NoRows is not an error, but a valid state.
@@ -64,7 +64,7 @@ func Each(r vrows.Rowser, eachRow func(ro vrows.Rower) (stop bool, err error)) (
 	return
 }
 
-func QueryEach(queryer vquery.Queryer, ctx context.Context, q param.Queryer, eachRow func(ro vrows.Rower) (cont bool, err error)) (err error) {
+func QueryEach(queryer vquery.Queryer, ctx context.Context, q vparam.Queryer, eachRow func(ro vrows.Rower) (cont bool, err error)) (err error) {
 	var qr vrows.Rowser
 	qr, err = queryer.Query(ctx, q)
 	if err == sql.ErrNoRows {
@@ -85,8 +85,8 @@ func QueryEach(queryer vquery.Queryer, ctx context.Context, q param.Queryer, eac
 //
 // One will also handle cleaning up the Rowser record when it returns, preventing memory leaks
 //
-// @param r comes from Query() calls
-// @param theRow is a predicate to call for the top vrow encountered. If you return an error, that error will be passed to the caller of One
+// @vparam r comes from Query() calls
+// @vparam theRow is a predicate to call for the top vrow encountered. If you return an error, that error will be passed to the caller of One
 // @return ok true if the database returned at least 1 vresult, false if nothing was returned
 // @return err the database error encountered or that was returned from eachRow
 //
@@ -103,7 +103,7 @@ func One(r vrows.Rowser, theRow func(ro vrows.Rower) (err error)) (ok bool, err 
 	return true, err
 }
 
-func QueryOne(queryer vquery.Queryer, ctx context.Context, q param.Queryer, theRow func(ro vrows.Rower) (err error)) (ok bool, err error) {
+func QueryOne(queryer vquery.Queryer, ctx context.Context, q vparam.Queryer, theRow func(ro vrows.Rower) (err error)) (ok bool, err error) {
 	var qr vrows.Rowser
 	qr, err = queryer.Query(ctx, q)
 	if err == sql.ErrNoRows {

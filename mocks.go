@@ -18,7 +18,7 @@ package vsql
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
-	"github.com/wojnosystems/vsql/param"
+	"github.com/wojnosystems/vsql/vparam"
 	"github.com/wojnosystems/vsql/vresult"
 	"github.com/wojnosystems/vsql/vrows"
 	"github.com/wojnosystems/vsql/vstmt"
@@ -38,7 +38,7 @@ type QueryExecerMock struct {
 	mock.Mock
 }
 
-func (m *QueryExecerMock) Query(ctx context.Context, q param.Queryer) (vrows.Rowser, error) {
+func (m *QueryExecerMock) Query(ctx context.Context, q vparam.Queryer) (vrows.Rowser, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -46,7 +46,7 @@ func (m *QueryExecerMock) Query(ctx context.Context, q param.Queryer) (vrows.Row
 	}
 	return r.(vrows.Rowser), a.Error(1)
 }
-func (m *QueryExecerMock) Insert(ctx context.Context, q param.Queryer) (vresult.InsertResulter, error) {
+func (m *QueryExecerMock) Insert(ctx context.Context, q vparam.Queryer) (vresult.InsertResulter, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -54,7 +54,7 @@ func (m *QueryExecerMock) Insert(ctx context.Context, q param.Queryer) (vresult.
 	}
 	return r.(vresult.InsertResulter), a.Error(1)
 }
-func (m *QueryExecerMock) Exec(ctx context.Context, q param.Queryer) (vresult.Resulter, error) {
+func (m *QueryExecerMock) Exec(ctx context.Context, q vparam.Queryer) (vresult.Resulter, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -72,7 +72,7 @@ func (m *QueryExecerMock) Begin(ctx context.Context, tx vtxn.TxOptioner) (QueryE
 	return r.(QueryExecNestedTransactioner), a.Error(1)
 }
 
-func (m *QueryExecerMock) Prepare(ctx context.Context, q param.Queryer) (vstmt.Statementer, error) {
+func (m *QueryExecerMock) Prepare(ctx context.Context, q vparam.Queryer) (vstmt.Statementer, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -93,7 +93,7 @@ func (m *SQLerMock) Begin(ctx context.Context, tx vtxn.TxOptioner) (QueryExecTra
 	}
 	return r.(QueryExecTransactioner), a.Error(1)
 }
-func (m *SQLerMock) Prepare(ctx context.Context, q param.Queryer) (vstmt.Statementer, error) {
+func (m *SQLerMock) Prepare(ctx context.Context, q vparam.Queryer) (vstmt.Statementer, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -109,7 +109,7 @@ func (m *SQLerMock) Close() error {
 	a := m.Called()
 	return a.Error(0)
 }
-func (m *SQLerMock) Query(ctx context.Context, q param.Queryer) (vrows.Rowser, error) {
+func (m *SQLerMock) Query(ctx context.Context, q vparam.Queryer) (vrows.Rowser, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -117,7 +117,7 @@ func (m *SQLerMock) Query(ctx context.Context, q param.Queryer) (vrows.Rowser, e
 	}
 	return r.(vrows.Rowser), a.Error(1)
 }
-func (m *SQLerMock) Insert(ctx context.Context, q param.Queryer) (vresult.InsertResulter, error) {
+func (m *SQLerMock) Insert(ctx context.Context, q vparam.Queryer) (vresult.InsertResulter, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -125,7 +125,7 @@ func (m *SQLerMock) Insert(ctx context.Context, q param.Queryer) (vresult.Insert
 	}
 	return r.(vresult.InsertResulter), a.Error(1)
 }
-func (m *SQLerMock) Exec(ctx context.Context, q param.Queryer) (vresult.Resulter, error) {
+func (m *SQLerMock) Exec(ctx context.Context, q vparam.Queryer) (vresult.Resulter, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -146,7 +146,7 @@ func (m *SQLNesterMock) Begin(ctx context.Context, tx vtxn.TxOptioner) (QueryExe
 	}
 	return r.(QueryExecNestedTransactioner), a.Error(1)
 }
-func (m *SQLNesterMock) Prepare(ctx context.Context, q param.Queryer) (vstmt.Statementer, error) {
+func (m *SQLNesterMock) Prepare(ctx context.Context, q vparam.Queryer) (vstmt.Statementer, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -162,7 +162,7 @@ func (m *SQLNesterMock) Close() error {
 	a := m.Called()
 	return a.Error(0)
 }
-func (m *SQLNesterMock) Query(ctx context.Context, q param.Queryer) (vrows.Rowser, error) {
+func (m *SQLNesterMock) Query(ctx context.Context, q vparam.Queryer) (vrows.Rowser, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -170,7 +170,7 @@ func (m *SQLNesterMock) Query(ctx context.Context, q param.Queryer) (vrows.Rowse
 	}
 	return r.(vrows.Rowser), a.Error(1)
 }
-func (m *SQLNesterMock) Insert(ctx context.Context, q param.Queryer) (vresult.InsertResulter, error) {
+func (m *SQLNesterMock) Insert(ctx context.Context, q vparam.Queryer) (vresult.InsertResulter, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -178,7 +178,7 @@ func (m *SQLNesterMock) Insert(ctx context.Context, q param.Queryer) (vresult.In
 	}
 	return r.(vresult.InsertResulter), a.Error(1)
 }
-func (m *SQLNesterMock) Exec(ctx context.Context, q param.Queryer) (vresult.Resulter, error) {
+func (m *SQLNesterMock) Exec(ctx context.Context, q vparam.Queryer) (vresult.Resulter, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -191,7 +191,7 @@ type PreparerMock struct {
 	mock.Mock
 }
 
-func (m *PreparerMock) Prepare(ctx context.Context, q param.Queryer) (vstmt.Statementer, error) {
+func (m *PreparerMock) Prepare(ctx context.Context, q vparam.Queryer) (vstmt.Statementer, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -240,7 +240,7 @@ func (m *QueryExecTransactionerMock) Rollback() error {
 	return a.Error(0)
 }
 
-func (m *QueryExecTransactionerMock) Prepare(ctx context.Context, q param.Queryer) (vstmt.Statementer, error) {
+func (m *QueryExecTransactionerMock) Prepare(ctx context.Context, q vparam.Queryer) (vstmt.Statementer, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {
@@ -272,7 +272,7 @@ func (m *QueryExecNestedTransactionerMock) Begin(ctx context.Context, tx vtxn.Tx
 	return r.(QueryExecNestedTransactioner), a.Error(1)
 }
 
-func (m *QueryExecNestedTransactionerMock) Prepare(ctx context.Context, q param.Queryer) (vstmt.Statementer, error) {
+func (m *QueryExecNestedTransactionerMock) Prepare(ctx context.Context, q vparam.Queryer) (vstmt.Statementer, error) {
 	a := m.Called(ctx, q)
 	r := a.Get(0)
 	if r == nil {

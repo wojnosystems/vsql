@@ -17,34 +17,34 @@ package vquery
 
 import (
 	"context"
-	"github.com/wojnosystems/vsql/param"
+	"github.com/wojnosystems/vsql/vparam"
 	"github.com/wojnosystems/vsql/vresult"
 	"github.com/wojnosystems/vsql/vrows"
 )
 
 type Queryer interface {
 	// Query the database for read-only results. If you need to insert or update/edit, use Inserter or Execer, respectively
-	// @param ctx Context to constrain the run-time of this call
-	// @param vquery the SQL vquery and parameters to use in the call
+	// @vparam ctx Context to constrain the run-time of this call
+	// @vparam vquery the SQL vquery and parameters to use in the call
 	// @return vrows the results, or nil if an error was encountered
 	// @return err errors encountered while making the database call. Database-specific errors are likely
-	Query(ctx context.Context, query param.Queryer) (rows vrows.Rowser, err error)
+	Query(ctx context.Context, query vparam.Queryer) (rows vrows.Rowser, err error)
 }
 
 type Inserter interface {
 	// Insert a vrow into the database
-	// @param ctx Context to constrain the run-time of this call
-	// @param vquery the SQL vquery and parameters to use in the call
+	// @vparam ctx Context to constrain the run-time of this call
+	// @vparam vquery the SQL vquery and parameters to use in the call
 	// @return vresult the outcome of the insert, or nil if an error was encountered
 	// @return err errors encountered while making the database call. Database-specific errors are likely
-	Insert(ctx context.Context, query param.Queryer) (result vresult.InsertResulter, err error)
+	Insert(ctx context.Context, query vparam.Queryer) (result vresult.InsertResulter, err error)
 }
 
 type Execer interface {
 	// Exec the database for update/edit requests
-	// @param ctx Context to constrain the run-time of this call
-	// @param vquery the SQL vquery and parameters to use in the call
+	// @vparam ctx Context to constrain the run-time of this call
+	// @vparam vquery the SQL vquery and parameters to use in the call
 	// @return vrows the results, or nil if an error was encountered
 	// @return err errors encountered while making the database call. Database-specific errors are likely
-	Exec(ctx context.Context, query param.Queryer) (result vresult.Resulter, err error)
+	Exec(ctx context.Context, query vparam.Queryer) (result vresult.Resulter, err error)
 }

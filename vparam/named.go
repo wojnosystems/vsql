@@ -13,7 +13,7 @@
 // OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package param
+package vparam
 
 import (
 	"fmt"
@@ -44,7 +44,7 @@ type named struct {
 }
 
 // NewNamed creates a new named query
-// @param query is the SQL you wish to execute. When you want to insert a value, use the colon (:) to denote the start of a named parameter. e.g. ":name"
+// @vparam query is the SQL you wish to execute. When you want to insert a value, use the colon (:) to denote the start of a named parameter. e.g. ":name"
 // @return the Queryer-conforming parameterer
 // @example
 //   query: "select * from users where name = :name AND :age = years_old"
@@ -59,8 +59,8 @@ func NewNamed(query string) Namer {
 
 // NewNamedWithData creates a new named query and also allows you to pass in named parameters
 // This makes one-line query-building easier
-// @param query is the SQL you wish to execute. When you want to insert a value, use the colon (:) to denote the start of a named parameter. e.g. ":name"
-// @param data are the key-value pairs for the parameterized values you wish to use with the query
+// @vparam query is the SQL you wish to execute. When you want to insert a value, use the colon (:) to denote the start of a named parameter. e.g. ":name"
+// @vparam data are the key-value pairs for the parameterized values you wish to use with the query
 // @return the Queryer-conforming parameterer
 // @example
 //   query: "select * from users where name = :name AND :age = years_old"
@@ -75,7 +75,7 @@ func NewNamedWithData(query string, data map[string]interface{}) Namer {
 
 // NewNamedData creates a new named query and also allows you to pass in named parameters, but not a string query
 // This makes one-line query-building easier
-// @param data are the key-value pairs for the parameterized values you wish to use with the query
+// @vparam data are the key-value pairs for the parameterized values you wish to use with the query
 // @return the Queryer-conforming parameterer
 // @example
 //   query: "select * from users where name = :name AND :age = years_old"
@@ -118,7 +118,7 @@ func (p *named) Interpolate(strategy interpolation_strategy.InterpolateStrategy)
 //
 // normalizeSQL stores this value in a cached internal field in case Interpolate is called multiple times
 //
-// @param strategy is how to insert placeholder for the driver-specific format
+// @vparam strategy is how to insert placeholder for the driver-specific format
 func (p *named) normalizeSQL(strategy interpolation_strategy.InterpolateStrategy) {
 	if len(p.queryNormalized) == 0 {
 		replacementCount := strings.Count(p.query, NamedPlaceholderPrefix)

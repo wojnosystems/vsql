@@ -18,19 +18,19 @@ package aggregator
 import (
 	"context"
 	"database/sql"
-	"github.com/wojnosystems/vsql/param"
 	"github.com/wojnosystems/vsql/ulong"
+	"github.com/wojnosystems/vsql/vparam"
 	"github.com/wojnosystems/vsql/vquery"
 	"github.com/wojnosystems/vsql/vrow"
 	"github.com/wojnosystems/vsql/vrows"
 )
 
 // Count is a convenience method to extract the COUNT from a vquery and assumes that your query looks like: `SELECT COUNT(*) FROM...`
-// @param ctx Context to constrain the run-time of this call
-// @param vquery the SQL vquery and parameters to use in the call
+// @vparam ctx Context to constrain the run-time of this call
+// @vparam vquery the SQL vquery and parameters to use in the call
 // @return number how many things are counted
 // @return err errors encountered while making the database call. Database-specific errors are likely
-func Count(ctx context.Context, queryer vquery.Queryer, q param.Queryer) (number ulong.ULong, err error) {
+func Count(ctx context.Context, queryer vquery.Queryer, q vparam.Queryer) (number ulong.ULong, err error) {
 	var ok bool
 	ok, err = vrow.QueryOne(queryer, ctx, q, func(ro vrows.Rower) (err error) {
 		return ro.Scan(&number)

@@ -13,37 +13,43 @@
 // OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package param
+package vparam
 
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestAppendParameter_Interpolate(t *testing.T) {
+func TestNamedParameter_Interpolate(t *testing.T) {
 	cases := map[string]struct {
 		queryIn            string
-		parametersIn       []interface{}
+		parametersIn       map[string]interface{}
 		queryExpected      string
 		parametersExpected []interface{}
 	}{
-		"basic select": {
-			queryIn:            "select * from mytable where value1 = ? and value2 = ?",
-			parametersIn:       []interface{}{5, "puppy"},
-			queryExpected:      "select * from mytable where value1 = ? and value2 = ?",
+		"basic select pet-first": {
+			queryIn:            "select * from my_table where value1 = :pet and value2 = :age",
+			parametersIn:       map[string]interface{}{"age": 5, "pet": "puppy"},
+			queryExpected:      "select * from my_table where value1 = ? and value2 = ?",
+			parametersExpected: []interface{}{"puppy", 5},
+		},
+		"basic select age-first": {
+			queryIn:            "select * from my_table where value1 = :age and value2 = :pet",
+			parametersIn:       map[string]interface{}{"age": 5, "pet": "puppy"},
+			queryExpected:      "select * from my_table where value1 = ? and value2 = ?",
 			parametersExpected: []interface{}{5, "puppy"},
 		},
 		"nothing": {
-			queryIn:            "select * from mytable",
-			parametersIn:       []interface{}{},
-			queryExpected:      "select * from mytable",
+			queryIn:            "select * from my_table",
+			parametersIn:       map[string]interface{}{},
+			queryExpected:      "select * from my_table",
 			parametersExpected: []interface{}{},
 		},
 	}
 	for caseName, c := range cases {
-		ap := NewAppend(c.queryIn)
-		for i := range c.parametersIn {
-			ap.Append(c.parametersIn[i])
+		ap := NewNamed(c.queryIn)
+		for k, v := range c.parametersIn {
+			ap.Set(k, v)
 		}
 		actualQuery, actualParams, err := ap.Interpolate(&testStrategyDefault)
 		if err != nil {
@@ -59,9 +65,18 @@ func TestAppendParameter_Interpolate(t *testing.T) {
 		}
 
 		// Test the NewAppendWithData
-		apwd := NewAppendWithData(c.queryIn, c.parametersIn...)
+		apwd := NewNamedWithData(c.queryIn, c.parametersIn)
 		apwdActualQuery, apwdActualParams, err := apwd.Interpolate(&testStrategyDefault)
 		assert.Equal(t, actualQuery, apwdActualQuery)
 		assert.Equal(t, actualParams, apwdActualParams)
 	}
 }
+
+type testStrategy struct {
+}
+
+func (m *testStrategy) InsertPlaceholderIntoSQL() string {
+	return "?"
+}
+
+var testStrategyDefault = testStrategy{}
