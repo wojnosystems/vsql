@@ -32,6 +32,10 @@ type Queryer interface {
 	// SQLQueryUnInterpolated is the query string with the placeholders in the string instead of mysql/postgres question marks/positional parameter placeholders
 	// This will get passed to the Parameterer.Interpolate call
 	SQLQueryUnInterpolated() string
+
+	// SQLQueryInterpolated converts the queryer to a sql string based on the strategy. THe output of this method is intended to be passed into a Prepare statement call.
+	SQLQueryInterpolated(strategy interpolation_strategy.InterpolateStrategy) string
+
 	Parameterer
 }
 

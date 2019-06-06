@@ -82,8 +82,8 @@ func (p *named) Set(key string, value interface{}) {
 }
 
 func (p *named) Interpolate(sqlQuery string, strategy interpolation_strategy.InterpolateStrategy) (interpolatedSQLQuery string, params []interface{}, err error) {
-	var orderedNamedParameters []string
-	interpolatedSQLQuery, orderedNamedParameters = normalizeSQL(sqlQuery, strategy)
+	interpolatedSQLQuery = p.SQLQueryInterpolated(strategy)
+	orderedNamedParameters := collectPlaceholderNames(sqlQuery)
 	orderedParams := make([]interface{}, 0, len(p.parameters))
 	for _, key := range orderedNamedParameters {
 		if value, ok := p.parameters[key]; !ok {
@@ -97,30 +97,40 @@ func (p *named) Interpolate(sqlQuery string, strategy interpolation_strategy.Int
 	return interpolatedSQLQuery, orderedParams, err
 }
 
-// normalizeSQL converts the sql-string with the named parameters into the driver-specific format (depending on the strategy)
+// collectPlaceholderNames converts the sql-string with the named parameters into the driver-specific format (depending on the strategy)
 //
 // @param unInterpolatedSQLQuery is the query from the Queryer object's SQLQueryUnInterpolated(). This should be the query as provided by the developer with placeholders for the named variables intead of question marks or ordinal parameters
-// @param strategy is how to insert placeholder for the driver-specific format
-// @return interpolatedSQLQuery is the query with the InterpolateStrategy parameters instead of the names of the parameter placeholders
 // @return orderedNamedParameters is the order in which parameters were encountered in the unInterpolatedSQLQuery. These are just tokens and not the actual values
-func normalizeSQL(unInterpolatedSQLQuery string, strategy interpolation_strategy.InterpolateStrategy) (interpolatedSQLQuery string, orderedNamedParameters []string) {
+func collectPlaceholderNames(unInterpolatedSQLQuery string) (orderedNamedParameters []string) {
 	replacementCount := strings.Count(unInterpolatedSQLQuery, NamedPlaceholderPrefix)
 	orderedNamedParameters = make([]string, 0, replacementCount)
-	sb := strings.Builder{}
 	parts := strings.Split(unInterpolatedSQLQuery, NamedPlaceholderPrefix)
-	sb.WriteString(parts[0])
 	if len(parts) > 1 {
 		for i := 1; i < len(parts); i++ {
 			match := namedParameterName.FindStringIndex(parts[i])
 			paramName := parts[i][match[0]:match[1]]
 			orderedNamedParameters = append(orderedNamedParameters, paramName)
-			// remove the name
+		}
+	}
+	return
+}
+
+// SQLQueryInterpolated converts the stored query string from named placeholders to a interpolation-strategy-specific string, ready to be passed to a database driver
+// @param strategy is how to insert placeholder for the driver-specific format
+// @return interpolatedSQLQuery is the query with the InterpolateStrategy parameters instead of the names of the parameter placeholders
+func (p *named) SQLQueryInterpolated(strategy interpolation_strategy.InterpolateStrategy) string {
+	sb := strings.Builder{}
+	parts := strings.Split(p.SQLQueryUnInterpolated(), NamedPlaceholderPrefix)
+	sb.WriteString(parts[0])
+	if len(parts) > 1 {
+		for i := 1; i < len(parts); i++ {
+			match := namedParameterName.FindStringIndex(parts[i])
+			// remove the name, replace with the strategy
 			sb.WriteString(strategy.InsertPlaceholderIntoSQL())
 			sb.WriteString(parts[i][match[1]:])
 		}
 	}
-	interpolatedSQLQuery = sb.String()
-	return
+	return sb.String()
 }
 
 // namedParameterName is a pre-compiled regular expression used to find the name of the named parameter AFTER the marker has been identified with colon (:)

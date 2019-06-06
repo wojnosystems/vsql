@@ -20,6 +20,8 @@ import (
 	"strings"
 )
 
+const AppenderPlaceholder = "?"
+
 // appender holds the data used for the Query/Exec calls and allows you to build it as you go
 type appender struct {
 	query
@@ -58,8 +60,13 @@ func (p *appender) Append(value interface{}) {
 }
 
 func (p *appender) Interpolate(sqlQuery string, strategy interpolation_strategy.InterpolateStrategy) (interpolatedSQLQuery string, params []interface{}, err error) {
-	if len(p.parameters) != strings.Count(sqlQuery, strategy.InsertPlaceholderIntoSQL()) {
+	interpolatedQuery := p.SQLQueryInterpolated(strategy)
+	if len(p.parameters) != strings.Count(interpolatedQuery, strategy.InsertPlaceholderIntoSQL()) {
 		return "", []interface{}{}, ErrParameterPlaceholderMismatch
 	}
-	return sqlQuery, p.parameters, nil
+	return interpolatedQuery, p.parameters, nil
+}
+
+func (p *appender) SQLQueryInterpolated(strategy interpolation_strategy.InterpolateStrategy) string {
+	return strings.ReplaceAll(p.query.SQLQueryUnInterpolated(), AppenderPlaceholder, strategy.InsertPlaceholderIntoSQL())
 }
