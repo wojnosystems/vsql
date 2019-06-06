@@ -32,6 +32,7 @@ type Queryer interface {
 	// SQLQueryUnInterpolated is the query string with the placeholders in the string instead of mysql/postgres question marks/positional parameter placeholders
 	// This will get passed to the Parameterer.Interpolate call
 	SQLQueryUnInterpolated() string
+	Parameterer
 }
 
 type Parameterer interface {
@@ -46,7 +47,6 @@ type Parameterer interface {
 // Appender is a type of Parameterer that is simply a list of parameters stuck into a SQL string
 type Appender interface {
 	Queryer
-	Parameterer
 	// Adds a parameter to the list of variables to parameterize. Values appended will be passed to Query/Exec in the order you called Append
 	Append(value interface{})
 }
@@ -55,7 +55,6 @@ type Appender interface {
 // Queries should be written with :named keys, which are prefixed with a colon (:) and consist only of a-zA-Z0-9_ and must not start with a number
 type Namer interface {
 	Queryer
-	Parameterer
 	Set(name string, value interface{})
 }
 
