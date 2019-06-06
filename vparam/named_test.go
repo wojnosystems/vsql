@@ -51,7 +51,7 @@ func TestNamedParameter_Interpolate(t *testing.T) {
 		for k, v := range c.parametersIn {
 			ap.Set(k, v)
 		}
-		actualQuery, actualParams, err := ap.Interpolate(&testStrategyDefault)
+		actualQuery, actualParams, err := ap.Interpolate(ap.SQLQueryUnInterpolated(), &testStrategyDefault)
 		if err != nil {
 			t.Errorf(`%s: Not expecting Interpolate to return an error`, caseName)
 		}
@@ -66,7 +66,7 @@ func TestNamedParameter_Interpolate(t *testing.T) {
 
 		// Test the NewAppendWithData
 		apwd := NewNamedWithData(c.queryIn, c.parametersIn)
-		apwdActualQuery, apwdActualParams, err := apwd.Interpolate(&testStrategyDefault)
+		apwdActualQuery, apwdActualParams, err := apwd.Interpolate(apwd.SQLQueryUnInterpolated(), &testStrategyDefault)
 		assert.Equal(t, actualQuery, apwdActualQuery)
 		assert.Equal(t, actualParams, apwdActualParams)
 	}

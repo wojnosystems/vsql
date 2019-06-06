@@ -16,7 +16,6 @@
 package vparam
 
 import (
-	"fmt"
 	"github.com/wojnosystems/vsql/interpolation_strategy"
 	"regexp"
 	"strings"
@@ -26,21 +25,10 @@ import (
 const NamedPlaceholderPrefix = ":"
 
 type named struct {
-	Namer
+	query
 
 	// parameters represents the values passed to the object through repeated calls to Set and/or from initialization
 	parameters map[string]interface{}
-
-	// query is the SQL with the named-placeholders already in the string
-	query string
-
-	// cached values after interpolate is run
-	// Saves work. Reset both by setting queryNormalized to empty string, this will trigger a full re-run
-	// queryNormalized is the `query` value transformed back into a driver-specific format
-	queryNormalized string
-
-	// orderedNamedParameters is the name of keys to look up in the order that the values of those keys need to appear in the parameterized query
-	orderedNamedParameters []string
 }
 
 // NewNamed creates a new named query
@@ -52,7 +40,7 @@ type named struct {
 //   queries for: users named "bob" who are 21 years old
 func NewNamed(query string) Namer {
 	return &named{
-		query:      query,
+		query:      *newQueryWithSQL(query),
 		parameters: make(map[string]interface{}),
 	}
 }
@@ -68,7 +56,7 @@ func NewNamed(query string) Namer {
 //   queries for: users named "bob" who are 21 years old
 func NewNamedWithData(query string, data map[string]interface{}) Namer {
 	return &named{
-		query:      query,
+		query:      *newQueryWithSQL(query),
 		parameters: data,
 	}
 }
@@ -83,7 +71,7 @@ func NewNamedWithData(query string, data map[string]interface{}) Namer {
 //   queries for: users named "bob" who are 21 years old
 func NewNamedData(data map[string]interface{}) Namer {
 	return &named{
-		query:      "",
+		query:      *newQuery(),
 		parameters: data,
 	}
 }
@@ -91,18 +79,13 @@ func NewNamedData(data map[string]interface{}) Namer {
 // Set inserts a key-value parameter pair. If it already existed, it is overwritten
 func (p *named) Set(key string, value interface{}) {
 	p.parameters[key] = value
-	p.queryNormalized = ""
 }
 
-func (p *named) SQLQuery(strategy interpolation_strategy.InterpolateStrategy) string {
-	p.normalizeSQL(strategy)
-	return p.queryNormalized
-}
-
-func (p *named) Interpolate(strategy interpolation_strategy.InterpolateStrategy) (query string, params []interface{}, err error) {
-	p.normalizeSQL(strategy)
+func (p *named) Interpolate(sqlQuery string, strategy interpolation_strategy.InterpolateStrategy) (interpolatedSQLQuery string, params []interface{}, err error) {
+	var orderedNamedParameters []string
+	interpolatedSQLQuery, orderedNamedParameters = normalizeSQL(sqlQuery, strategy)
 	orderedParams := make([]interface{}, 0, len(p.parameters))
-	for _, key := range p.orderedNamedParameters {
+	for _, key := range orderedNamedParameters {
 		if value, ok := p.parameters[key]; !ok {
 			// named parameter found, but no mapping for its value was found
 			err = &ErrMissingNamedParam{name: key}
@@ -111,43 +94,33 @@ func (p *named) Interpolate(strategy interpolation_strategy.InterpolateStrategy)
 			orderedParams = append(orderedParams, value)
 		}
 	}
-	return p.queryNormalized, orderedParams, err
+	return interpolatedSQLQuery, orderedParams, err
 }
 
 // normalizeSQL converts the sql-string with the named parameters into the driver-specific format (depending on the strategy)
 //
-// normalizeSQL stores this value in a cached internal field in case Interpolate is called multiple times
-//
-// @vparam strategy is how to insert placeholder for the driver-specific format
-func (p *named) normalizeSQL(strategy interpolation_strategy.InterpolateStrategy) {
-	if len(p.queryNormalized) == 0 {
-		replacementCount := strings.Count(p.query, NamedPlaceholderPrefix)
-		p.orderedNamedParameters = make([]string, 0, replacementCount)
-		sb := strings.Builder{}
-		parts := strings.Split(p.query, NamedPlaceholderPrefix)
-		sb.WriteString(parts[0])
-		if len(parts) > 1 {
-			for i := 1; i < len(parts); i++ {
-				match := namedParameterName.FindStringIndex(parts[i])
-				paramName := parts[i][match[0]:match[1]]
-				p.orderedNamedParameters = append(p.orderedNamedParameters, paramName)
-				// remove the name
-				sb.WriteString(strategy.InsertPlaceholderIntoSQL())
-				sb.WriteString(parts[i][match[1]:])
-			}
+// @param unInterpolatedSQLQuery is the query from the Queryer object's SQLQueryUnInterpolated(). This should be the query as provided by the developer with placeholders for the named variables intead of question marks or ordinal parameters
+// @param strategy is how to insert placeholder for the driver-specific format
+// @return interpolatedSQLQuery is the query with the InterpolateStrategy parameters instead of the names of the parameter placeholders
+// @return orderedNamedParameters is the order in which parameters were encountered in the unInterpolatedSQLQuery. These are just tokens and not the actual values
+func normalizeSQL(unInterpolatedSQLQuery string, strategy interpolation_strategy.InterpolateStrategy) (interpolatedSQLQuery string, orderedNamedParameters []string) {
+	replacementCount := strings.Count(unInterpolatedSQLQuery, NamedPlaceholderPrefix)
+	orderedNamedParameters = make([]string, 0, replacementCount)
+	sb := strings.Builder{}
+	parts := strings.Split(unInterpolatedSQLQuery, NamedPlaceholderPrefix)
+	sb.WriteString(parts[0])
+	if len(parts) > 1 {
+		for i := 1; i < len(parts); i++ {
+			match := namedParameterName.FindStringIndex(parts[i])
+			paramName := parts[i][match[0]:match[1]]
+			orderedNamedParameters = append(orderedNamedParameters, paramName)
+			// remove the name
+			sb.WriteString(strategy.InsertPlaceholderIntoSQL())
+			sb.WriteString(parts[i][match[1]:])
 		}
-		p.queryNormalized = sb.String()
 	}
-}
-
-// ErrMissingNamedParam is a custom error message so we can indicate which key was used that didn't exist
-type ErrMissingNamedParam struct {
-	name string
-}
-
-// Error satisfies the Error interface and prints a lovely message about which key was used but was missing. Very helpful for debugging ;)
-func (e ErrMissingNamedParam) Error() string {
-	return fmt.Sprintf(`named parameter "%s" was not set to a value`, e.name)
+	interpolatedSQLQuery = sb.String()
+	return
 }
 
 // namedParameterName is a pre-compiled regular expression used to find the name of the named parameter AFTER the marker has been identified with colon (:)

@@ -15,19 +15,21 @@
 
 package vparam
 
-import "github.com/wojnosystems/vsql/interpolation_strategy"
+import (
+	"github.com/wojnosystems/vsql/interpolation_strategy"
+	"strings"
+)
 
 // appender holds the data used for the Query/Exec calls and allows you to build it as you go
 type appender struct {
-	Appender
+	query
 	parameters []interface{}
-	query      string
 }
 
 // NewAppend creates a new appending Parameterer in which you can repeatedly append values to the parameter list as desired
 func NewAppend(query string) Appender {
 	return &appender{
-		query:      query,
+		query:      *newQueryWithSQL(query),
 		parameters: make([]interface{}, 0, 1),
 	}
 }
@@ -35,7 +37,7 @@ func NewAppend(query string) Appender {
 // NewAppendData creates a new appending Parameterer in which you can repeatedly append values to the parameter list as desired, but this has no query string
 func NewAppendData(data ...interface{}) Appender {
 	return &appender{
-		query:      "",
+		query:      *newQuery(),
 		parameters: data,
 	}
 }
@@ -44,7 +46,7 @@ func NewAppendData(data ...interface{}) Appender {
 // this version allows you to optionally set a variadic amount of data to append. This makes one-line vquery-building easier
 func NewAppendWithData(query string, data ...interface{}) Appender {
 	return &appender{
-		query:      query,
+		query:      *newQueryWithSQL(query),
 		parameters: data,
 	}
 }
@@ -55,10 +57,9 @@ func (p *appender) Append(value interface{}) {
 	p.parameters = append(p.parameters, value)
 }
 
-func (p *appender) SQLQuery(strategy interpolation_strategy.InterpolateStrategy) string {
-	return p.query
-}
-
-func (p *appender) Interpolate(strategy interpolation_strategy.InterpolateStrategy) (query string, params []interface{}, err error) {
-	return p.query, p.parameters, nil
+func (p *appender) Interpolate(sqlQuery string, strategy interpolation_strategy.InterpolateStrategy) (interpolatedSQLQuery string, params []interface{}, err error) {
+	if len(p.parameters) != strings.Count(sqlQuery, strategy.InsertPlaceholderIntoSQL()) {
+		return "", []interface{}{}, ErrParameterPlaceholderMismatch
+	}
+	return sqlQuery, p.parameters, nil
 }

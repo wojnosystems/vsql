@@ -15,7 +15,19 @@
 
 package vparam
 
-// New creates a new appending Parameterer, but is intended to not have parameterized values added to it. This is just a convenience method for an Appender with no parameters to append (but you CAN append values if you change your mind later)
-func New(query string) Appender {
-	return NewAppend(query)
+import (
+	"github.com/stretchr/testify/mock"
+	"github.com/wojnosystems/vsql/interpolation_strategy"
+)
+
+type ParametererMock struct {
+	mock.Mock
+}
+
+func (q *ParametererMock) Interpolate(sqlQuery string, strategy interpolation_strategy.InterpolateStrategy) (interpolatedSQLQuery string, params []interface{}, err error) {
+	a := q.Called(sqlQuery, strategy)
+	interpolatedSQLQuery = a.Get(0).(string)
+	params = a.Get(1).([]interface{})
+	err = a.Error(2)
+	return
 }

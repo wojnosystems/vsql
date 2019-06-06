@@ -15,7 +15,11 @@
 
 package vparam
 
-import "github.com/wojnosystems/vsql/interpolation_strategy"
+import (
+	"errors"
+	"fmt"
+	"github.com/wojnosystems/vsql/interpolation_strategy"
+)
 
 // Param package describes the interfaces and implementations for types of parameter representations.
 // This is my attempt to unify the methodologies of modelling SQL strings across the various database/sql drivers.
@@ -25,31 +29,45 @@ import "github.com/wojnosystems/vsql/interpolation_strategy"
 // When creating methods that take sql queries, such as Exec, Query, etc, this should be the interface you need to use. The easy_sql library uses this heavily for this purpose.
 // This is an interface to allow you to customize your parameter handling as you see fit or to future proof your code. This also means you can pick and choose which approach you'd like to take. You can append values or use named values as you wish.
 type Queryer interface {
-	Parameterer
+	// SQLQueryUnInterpolated is the query string with the placeholders in the string instead of mysql/postgres question marks/positional parameter placeholders
+	// This will get passed to the Parameterer.Interpolate call
+	SQLQueryUnInterpolated() string
 }
 
-// Parameterer is the basic interface that defines things that generate SQL-string + value arrays that will be passed to the db.Query/db.Exec calls
 type Parameterer interface {
 	// Interpolate injects the parameters into the provided statement
-	// @return query the string SQL vquery, with the placeholders for parameters inserted as per the interpolation strategy
+	// @param sqlQuery is the query with placeholders instead of parameter values
+	// @return interpolatedSQLQuery the string SQL vquery, with the placeholders for parameters inserted as per the interpolation strategy
 	// @return params the values to inject
 	// @return err any errors interpolating the vquery
-	Interpolate(strategy interpolation_strategy.InterpolateStrategy) (query string, params []interface{}, err error)
-
-	// SQLQuery is the sql-vquery, ready to be passed to the underlying driver for Exec/Query, with the proper parameter markers already substituted
-	SQLQuery(strategy interpolation_strategy.InterpolateStrategy) string
+	Interpolate(sqlQuery string, strategy interpolation_strategy.InterpolateStrategy) (interpolatedSQLQuery string, params []interface{}, err error)
 }
 
 // Appender is a type of Parameterer that is simply a list of parameters stuck into a SQL string
 type Appender interface {
+	Queryer
+	Parameterer
 	// Adds a parameter to the list of variables to parameterize. Values appended will be passed to Query/Exec in the order you called Append
 	Append(value interface{})
-	Parameterer
 }
 
 // Namer is a type of Parameterer that is a SQL-string with a collection of named keys paired with values
 // Queries should be written with :named keys, which are prefixed with a colon (:) and consist only of a-zA-Z0-9_ and must not start with a number
 type Namer interface {
-	Set(name string, value interface{})
+	Queryer
 	Parameterer
+	Set(name string, value interface{})
+}
+
+// ErrParameterPlaceholderMismatch is returned when Interpolation is performed, but there are more or fewer placeholders than there is data to put in those parameter placeholders
+var ErrParameterPlaceholderMismatch = errors.New("interpolation failed: the number of provided parameters doesn't match the number of placeholders")
+
+// ErrMissingNamedParam is a custom error message so we can indicate which key was used that didn't exist
+type ErrMissingNamedParam struct {
+	name string
+}
+
+// Error satisfies the Error interface and prints a lovely message about which key was used but was missing. Very helpful for debugging ;)
+func (e ErrMissingNamedParam) Error() string {
+	return fmt.Sprintf(`named parameter "%s" was not set to a value`, e.name)
 }

@@ -24,14 +24,15 @@ type QueryerMock struct {
 	mock.Mock
 }
 
-func (q *QueryerMock) Interpolate(strategy interpolation_strategy.InterpolateStrategy) (query string, params []interface{}, err error) {
-	a := q.Called(strategy)
-	query = a.Get(0).(string)
+func (q *QueryerMock) Interpolate(sqlQuery string, strategy interpolation_strategy.InterpolateStrategy) (interpolatedSQLQuery string, params []interface{}, err error) {
+	a := q.Called(sqlQuery, strategy)
+	interpolatedSQLQuery = a.Get(0).(string)
 	params = a.Get(1).([]interface{})
 	err = a.Error(2)
 	return
 }
-func (q *QueryerMock) SQLQuery(strategy interpolation_strategy.InterpolateStrategy) string {
-	a := q.Called(strategy)
+
+func (q *QueryerMock) SQLQueryUnInterpolated() string {
+	a := q.Called()
 	return a.Get(0).(string)
 }

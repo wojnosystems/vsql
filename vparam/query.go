@@ -15,7 +15,24 @@
 
 package vparam
 
-// New creates a new appending Parameterer, but is intended to not have parameterized values added to it. This is just a convenience method for an Appender with no parameters to append (but you CAN append values if you change your mind later)
-func New(query string) Appender {
-	return NewAppend(query)
+type query struct {
+	unInterpolatedSQLQuery string
+}
+
+func newQuery() *query {
+	return &query{}
+}
+
+func newQueryWithSQL(s string) *query {
+	return &query{
+		unInterpolatedSQLQuery: s,
+	}
+}
+
+func (q query) SQLQueryUnInterpolated() string {
+	return q.unInterpolatedSQLQuery
+}
+
+func (q *query) SetSQLQueryUnInterpolated(s string) {
+	q.unInterpolatedSQLQuery = s
 }
